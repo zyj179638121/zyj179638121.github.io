@@ -4,7 +4,7 @@
   <title><![CDATA[小赵的blog]]></title>
   <link href="http://zyj179638121.github.io/atom.xml" rel="self"/>
   <link href="http://zyj179638121.github.io/"/>
-  <updated>2016-08-01T17:02:58+08:00</updated>
+  <updated>2016-08-03T15:51:12+08:00</updated>
   <id>http://zyj179638121.github.io/</id>
   <author>
     <name><![CDATA[小赵]]></name>
@@ -12,6 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[iOS UITabbar消失的问题]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98/"/>
+    <updated>2016-08-03T15:37:27+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/08/03/iOS UITabbar消失的问题</id>
+    <content type="html"><![CDATA[<p>前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom Bar on Push,结果我在ViewController对应的属性上勾上了此选项&hellip;</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[iOS 第一章]]></title>

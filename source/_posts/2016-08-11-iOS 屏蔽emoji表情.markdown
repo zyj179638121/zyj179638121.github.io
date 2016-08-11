@@ -6,31 +6,43 @@ comments: true
 categories: 
 ---
 
-**iOS屏蔽emoji表情,直接上代码**   
+**iOS屏蔽emoji表情,直接上代码,Swift国旗的emoji暂时不能屏蔽,其余的基本上都可以**   
 
 `Swift版本`   
 
 ```
-func textViewDidChange(textView: UITextView) {
-        let textRange = textView.selectedRange
-        textView.text = self.disableEmoji(textView.text)
-        textView.selectedRange = textRange
+func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        
+        if text.containsEmoji {
+            return false
+        }
+        
+        return true
     }
 
 ```
 ```
-func disableEmoji(text:String) -> String{
-        
-        var regex:NSRegularExpression?
-        do {
-            try regex = NSRegularExpression.init(pattern: "[^\\u0020-\\u007E\\u00A0-\\u00BE\\u2E80-\\uA4CF\\uF900-\\uFAFF\\uFE30-\\uFE4F\\uFF00-\\uFFEF\\u0080-\\u009F\\u2000-\\u201f\r\n]", options: .CaseInsensitive)
-        }catch{
-            print(error)
+extension String {
+    var containsEmoji: Bool {
+        for scalar in unicodeScalars {
+            switch scalar.value {
+            case 0x1F600...0x1F64F,
+             0x1F300...0x1F5FF,
+             0x1F680...0x1F6FF,
+             0x2600...0x26FF,
+             0x2700...0x278B,
+             0x2792...0x27BF,
+             0xFE00...0xFE0F:
+                return true
+            case 0x278B...0x2792:
+                return false
+            default:
+                continue
+            }
         }
-        
-        let modifiedString = regex!.stringByReplacingMatchesInString(text as String, options: .ReportProgress, range: NSMakeRange(0, text.characters.count), withTemplate: "")
-        return modifiedString
+        return false
     }
+}
 ```   
 
 `OC版本`

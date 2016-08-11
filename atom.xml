@@ -4,7 +4,7 @@
   <title><![CDATA[小赵的blog]]></title>
   <link href="http://zyj179638121.github.io/atom.xml" rel="self"/>
   <link href="http://zyj179638121.github.io/"/>
-  <updated>2016-08-11T15:22:39+08:00</updated>
+  <updated>2016-08-11T16:25:07+08:00</updated>
   <id>http://zyj179638121.github.io/</id>
   <author>
     <name><![CDATA[小赵]]></name>
@@ -27,10 +27,16 @@
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>func textViewDidChange(textView: UITextView) {
-</span><span class='line'>        let textRange = textView.selectedRange
-</span><span class='line'>        textView.text = self.disableEmoji(textView.text)
-</span><span class='line'>        textView.selectedRange = textRange
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -&gt; Bool {
+</span><span class='line'>        
+</span><span class='line'>        if text.containsEmoji {
+</span><span class='line'>            return false
+</span><span class='line'>        }
+</span><span class='line'>        
+</span><span class='line'>        return true
 </span><span class='line'>    }
 </span></code></pre></td></tr></table></div></figure>
 
@@ -47,18 +53,36 @@
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>func disableEmoji(text:String) -&gt; String{
-</span><span class='line'>        
-</span><span class='line'>        var regex:NSRegularExpression?
-</span><span class='line'>        do {
-</span><span class='line'>            try regex = NSRegularExpression.init(pattern: "[^\\u0020-\\u007E\\u00A0-\\u00BE\\u2E80-\\uA4CF\\uF900-\\uFAFF\\uFE30-\\uFE4F\\uFF00-\\uFFEF\\u0080-\\u009F\\u2000-\\u201f\r\n]", options: .CaseInsensitive)
-</span><span class='line'>        }catch{
-</span><span class='line'>            print(error)
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>extension String {
+</span><span class='line'>    var containsEmoji: Bool {
+</span><span class='line'>        for scalar in unicodeScalars {
+</span><span class='line'>            switch scalar.value {
+</span><span class='line'>            case 0x1F600...0x1F64F,
+</span><span class='line'>             0x1F300...0x1F5FF,
+</span><span class='line'>             0x1F680...0x1F6FF,
+</span><span class='line'>             0x2600...0x26FF,
+</span><span class='line'>             0x2700...0x278B,
+</span><span class='line'>             0x2792...0x27BF,
+</span><span class='line'>             0xFE00...0xFE0F:
+</span><span class='line'>                return true
+</span><span class='line'>            case 0x278B...0x2792:
+</span><span class='line'>                return false
+</span><span class='line'>            default:
+</span><span class='line'>                continue
+</span><span class='line'>            }
 </span><span class='line'>        }
-</span><span class='line'>        
-</span><span class='line'>        let modifiedString = regex!.stringByReplacingMatchesInString(text as String, options: .ReportProgress, range: NSMakeRange(0, text.characters.count), withTemplate: "")
-</span><span class='line'>        return modifiedString
-</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>        return false
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
 
 
 <p></p>

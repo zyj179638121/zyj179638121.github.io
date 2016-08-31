@@ -9,7 +9,15 @@
   <meta name="author" content="小赵">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts ">
+  <meta name="description" content="iOS屏蔽emoji表情,直接上代码,Swift国旗的emoji暂时不能屏蔽,其余的基本上都可以 Swift版本 1
+2
+3
+4
+5
+6
+7
+8
+func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +74,290 @@
       <div class="blog-index">
   
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-08-11T09:49:46+08:00'><span class='date'>2016 年8 月11 日</span> <span class='time'>9:49 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>iOS屏蔽emoji表情,直接上代码,Swift国旗的emoji暂时不能屏蔽,其余的基本上都可以</strong></p>
+
+<p><code>Swift版本</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -&gt; Bool {
+</span><span class='line'>        
+</span><span class='line'>        if text.containsEmoji {
+</span><span class='line'>            return false
+</span><span class='line'>        }
+</span><span class='line'>        
+</span><span class='line'>        return true
+</span><span class='line'>    }
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>extension String {
+</span><span class='line'>    var containsEmoji: Bool {
+</span><span class='line'>        for scalar in unicodeScalars {
+</span><span class='line'>            switch scalar.value {
+</span><span class='line'>            case 0x1F600...0x1F64F,
+</span><span class='line'>             0x1F300...0x1F5FF,
+</span><span class='line'>             0x1F680...0x1F6FF,
+</span><span class='line'>             0x2600...0x26FF,
+</span><span class='line'>             0x2700...0x278B,
+</span><span class='line'>             0x2792...0x27BF,
+</span><span class='line'>             0xFE00...0xFE0F:
+</span><span class='line'>                return true
+</span><span class='line'>            case 0x278B...0x2792:
+</span><span class='line'>                return false
+</span><span class='line'>            default:
+</span><span class='line'>                continue
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>        return false
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p><code>OC版本</code></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text{
+</span><span class='line'>    BOOL result = [self stringContainsEmoji:text];
+</span><span class='line'>    if (result) {
+</span><span class='line'>        return NO;
+</span><span class='line'>    }
+</span><span class='line'>    return YES;
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>- (BOOL)stringContainsEmoji:(NSString *)string
+</span><span class='line'>{
+</span><span class='line'>    __block BOOL returnValue = NO;
+</span><span class='line'>    
+</span><span class='line'>    [string enumerateSubstringsInRange:NSMakeRange(0, [string length])
+</span><span class='line'>                               options:NSStringEnumerationByComposedCharacterSequences
+</span><span class='line'>                            usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+</span><span class='line'>                                const unichar hs = [substring characterAtIndex:0];
+</span><span class='line'>                                NSLog(@"hs = %hu",hs);
+</span><span class='line'>                                if (0xd800 &lt;= hs && hs &lt;= 0xdbff) {
+</span><span class='line'>                                    if (substring.length &gt; 1) {
+</span><span class='line'>                                        const unichar ls = [substring characterAtIndex:1];
+</span><span class='line'>                                        const int uc = ((hs - 0xd800) * 0x400) + (ls - 0xdc00) + 0x10000;
+</span><span class='line'>                                        if (0x1d000 &lt;= uc && uc &lt;= 0x1f77f) {
+</span><span class='line'>                                            returnValue = YES;
+</span><span class='line'>                                        }
+</span><span class='line'>                                    }
+</span><span class='line'>                                } else if (substring.length &gt; 1) {
+</span><span class='line'>                                    const unichar ls = [substring characterAtIndex:1];
+</span><span class='line'>                                    if (ls == 0x20e3) {
+</span><span class='line'>                                        returnValue = YES;
+</span><span class='line'>                                    }
+</span><span class='line'>                                } else {
+</span><span class='line'>                                    if (0x2100 &lt;= hs && hs &lt;= 0x27ff) {
+</span><span class='line'>                                        if (0x278B &lt;= hs && hs &lt;= 0x2792){
+</span><span class='line'>                                            returnValue = NO;
+</span><span class='line'>                                        }else{
+</span><span class='line'>                                            returnValue = YES;
+</span><span class='line'>                                        }
+</span><span class='line'>                                    } else if (0x2B05 &lt;= hs && hs &lt;= 0x2b07) {
+</span><span class='line'>                                        returnValue = YES;
+</span><span class='line'>                                    } else if (0x2934 &lt;= hs && hs &lt;= 0x2935) {
+</span><span class='line'>                                        returnValue = YES;
+</span><span class='line'>                                    } else if (0x3297 &lt;= hs && hs &lt;= 0x3299) {
+</span><span class='line'>                                        returnValue = YES;
+</span><span class='line'>                                    } else if (hs == 0xa9 || hs == 0xae || hs == 0x303d || hs == 0x3030 || hs == 0x2b55 || hs == 0x2b1c || hs == 0x2b1b || hs == 0x2b50) {
+</span><span class='line'>                                        returnValue = YES;
+</span><span class='line'>                                    }
+</span><span class='line'>                                }
+</span><span class='line'>                            }];
+</span><span class='line'>    
+</span><span class='line'>    return returnValue;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-08-03T15:37:27+08:00'><span class='date'>2016 年8 月3 日</span> <span class='time'>3:37 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom Bar on Push,结果我在ViewController对应的属性上勾上了此选项&hellip;</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS 第一章</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-08-01T15:34:27+08:00'><span class='date'>2016 年8 月1 日</span> <span class='time'>3:34 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>第一次写东西,git关联远程仓库</h1>
+
+<h2>gogs</h2>
+
+<p>1.gogs上面新建一个仓库<br/>
+2.xcode新建工程<br/>
+3.git add .<br/>
+4.git commit -m “commit information” //commit<br/>
+5.git remote add origin xxxxxxx //添加远程仓库,xxx为仓库地址<br/>
+6.git push -u origin master  // push到远程仓库</p>
+
+<h2>gitoschina</h2>
+
+<p>1.oschina上面新建一个仓库<br/>
+2.xcode新建工程<br/>
+3.git add .<br/>
+4.git commit -m “commit information”<br/>
+5.git remote add origin xxxx //添加远程仓库,xxx为仓库地址<br/>
+6.git pull origin master //这时如果不先pull,直接push回报错,需要先同步当前分支和主分支一致<br/>
+7.git push origin master //push到远程分支</p>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
     <a href="/blog/archives">Blog Archives</a>
@@ -77,6 +369,18 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS 第一章</a>
+      </li>
     
   </ul>
 </section>

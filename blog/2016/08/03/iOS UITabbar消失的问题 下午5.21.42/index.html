@@ -5,14 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Blog Archive - 小赵的blog</title>
+  <title>iOS UITabbar消失的问题 - 小赵的blog</title>
   <meta name="author" content="小赵">
 
   
-  <meta name="description" content=" Blog Archive 2016 iOS屏蔽emoji表情
-Aug 11 2016 iOS UITabbar消失的问题
-Aug 03 2016 iOS 第一章
-Aug 01 2016 Recent Posts iOS屏蔽emoji表情 iOS UITabbar消失的问题 iOS 第一章 ">
+  <meta name="description" content="前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +18,7 @@ Aug 01 2016 Recent Posts iOS屏蔽emoji表情 iOS UITabbar消失的问题 iOS �
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://zyj179638121.github.io/blog/archives/">
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
@@ -67,51 +64,66 @@ Aug 01 2016 Recent Posts iOS屏蔽emoji表情 iOS UITabbar消失的问题 iOS �
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Blog Archive</h1>
+    
+      <h1 class="entry-title">iOS UITabbar消失的问题</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-08-03T15:37:27+08:00'><span class='date'>2016 年8 月3 日</span> <span class='time'>3:37 pm</span></time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives">
 
 
-
-  
-  <h2>2016</h2>
-
-<article>
-  
-<h1><a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a></h1>
-<time datetime="2016-08-11T09:49:46+08:00" pubdate><span class='month'>Aug</span> <span class='day'>11</span> <span class='year'>2016</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a></h1>
-<time datetime="2016-08-03T15:37:27+08:00" pubdate><span class='month'>Aug</span> <span class='day'>03</span> <span class='year'>2016</span></time>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS 第一章</a></h1>
-<time datetime="2016-08-01T15:34:27+08:00" pubdate><span class='month'>Aug</span> <span class='day'>01</span> <span class='year'>2016</span></time>
-
-
-</article>
-
+<div class="entry-content"><p>前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom Bar on Push,结果我在ViewController对应的属性上勾上了此选项&hellip;</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-08-03T15:37:27+08:00'><span class='date'>2016 年8 月3 日</span> <span class='time'>3:37 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/" title="Previous Post: iOS 第一章">&laquo; iOS 第一章</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/" title="Next Post: iOS屏蔽emoji表情">iOS屏蔽emoji表情 &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
 </div>

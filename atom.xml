@@ -4,7 +4,7 @@
   <title><![CDATA[小赵的blog]]></title>
   <link href="http://zyj179638121.github.io/atom.xml" rel="self"/>
   <link href="http://zyj179638121.github.io/"/>
-  <updated>2016-09-01T09:37:53+08:00</updated>
+  <updated>2016-09-01T09:59:25+08:00</updated>
   <id>http://zyj179638121.github.io/</id>
   <author>
     <name><![CDATA[小赵]]></name>
@@ -238,6 +238,651 @@
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[UIView的layoutSubviews和drawRect方法何时调用]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/"/>
+    <updated>2016-01-28T10:47:09+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/01/28/UIView的layoutSubviews和drawRect方法何时调用</id>
+    <content type="html"><![CDATA[<h4>layoutSubviews在以下情况下会被调用：</h4>
+
+<!--more-->
+
+
+<ul>
+<li>1、init初始化不会触发layoutSubviews。</li>
+<li>2、addSubview会触发layoutSubviews。</li>
+<li>3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化。</li>
+<li>4、滚动一个UIScrollView会触发layoutSubviews。</li>
+<li>5、旋转Screen会触发父UIView上的layoutSubviews事件。</li>
+<li>6、改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件。</li>
+<li>7、直接调用setLayoutSubviews。</li>
+</ul>
+
+
+<h4>drawRect在以下情况下会被调用：</h4>
+
+<ul>
+<li>1、如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。drawRect 掉用是在Controller->loadView, Controller->viewDidLoad 两方法之后掉用的.所以不用担心在 控制器中,这些View的drawRect就开始画了.这样可以在控制器中设置一些值给View(如果这些View draw的时候需要用到某些变量 值).</li>
+<li>2、该方法在调用sizeToFit后被调用，所以可以先调用sizeToFit计算出size。然后系统自动调用drawRect:方法。</li>
+<li>3、通过设置contentMode属性值为UIViewContentModeRedraw。那么将在每次设置或更改frame的时候自动调用drawRect:。</li>
+<li>4、直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect:，但是有个前提条件是rect不能为0。以上1,2推荐；而3,4不提倡</li>
+</ul>
+
+
+<h4>drawRect方法使用注意点：</h4>
+
+<ul>
+<li>1、 若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate 的ref并且不能用于画图。drawRect：方法不能手动显示调用，必须通过调用setNeedsDisplay 或 者 setNeedsDisplayInRect，让系统自动调该方法。</li>
+<li>2、若使用calayer绘图，只能在drawInContext: 中（类似鱼drawRect）绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法</li>
+<li>3、若要实时画图，不能使用gestureRecognizer，只能使用touchbegan等方法来掉用setNeedsDisplay实时刷新屏幕</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift单例]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/"/>
+    <updated>2016-01-22T17:14:21+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/01/22/swift单例</id>
+    <content type="html"><![CDATA[<pre><code>class ShareInstance {
+static let sharedInstance = ShareInstance()
+private init() {} //This prevents others from using the default '()' initializer for this class.
+</code></pre>
+
+<p>}</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift小结]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/01/05/swift%E5%B0%8F%E7%BB%93/"/>
+    <updated>2016-01-05T13:22:26+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/01/05/swift小结</id>
+    <content type="html"><![CDATA[<h3>数组相关语法更新</h3>
+
+<!--more-->
+
+
+<pre><code>var array = [1,4,7]
+// 数组内插入一个新的数组
+array.insertContentsOf([9,6], at:1)
+// 替换某个位置为一个新的数组
+array.replaceRange(0...2, with: [1,1,0])
+// 排序
+
+//  数组排序还可以调用 sort方法,与sorted不一样的是,sort排序是修改数组本身排序且不会返回结果,sorted则返回排序后的结果但不修改数组本身。所以调用sort方法的数组只能为var定义的变量
+array.sortInPlace { $0 &lt; $1 }
+</code></pre>
+
+<h3>swift NSSession解析</h3>
+
+<p>import UIKit</p>
+
+<p>class ViewController: UIViewController,NSURLSessionDelegate,NSURLSessionDataDelegate {</p>
+
+<pre><code>var session:NSURLSession!
+
+override func viewDidLoad() {
+    super.viewDidLoad()
+
+
+    //let config = NSURLSessionConfiguration.backgroundSessionConfiguration("back")//不赞成使用
+    //let config = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("back")//委托中不能使用,使用系统处理下载,就算APP没有运行了,也可以实现
+    //let config = NSURLSessionConfiguration.ephemeralSessionConfiguration();//这个是临时数据下载,适用于小数据下载
+    let config = NSURLSessionConfiguration.defaultSessionConfiguration()//默认配置
+    config.timeoutIntervalForRequest = 15 //连接超时时间
+
+    session = NSURLSession(configuration: config, delegate: self, delegateQueue:nil)//队列中,如果想要程序在主线程中执行,可以使用NSOperationQueue.mainQueue()
+
+    let url = NSURL(string: "http://www.wutongwei.com")
+
+
+    let task = session.dataTaskWithURL(url!, completionHandler: { (
+        data, response, error) -&gt; Void in
+
+
+        let str = NSString(data: data, encoding: NSUTF8StringEncoding)
+        println("Done!")
+
+        self.session.finishTasksAndInvalidate() //确保执行完成后,释放session
+
+
+        if error == nil {
+
+            let manager = NSFileManager()
+
+            //
+            var error:NSError?
+            var destinationPath = manager.URLForDirectory(NSSearchPathDirectory.CachesDirectory, inDomain: NSSearchPathDomainMask.UserDomainMask, appropriateForURL: url, create: true, error: &amp;error)!
+            //
+            let componenetsOfUrl = url?.absoluteString!.componentsSeparatedByString("/")
+            let index = componenetsOfUrl!.count - 1
+            let fileNameFromUrl = componenetsOfUrl![index]
+
+            destinationPath = destinationPath.URLByAppendingPathComponent(fileNameFromUrl)
+
+
+            //
+            manager.moveItemAtURL(url!, toURL: destinationPath, error: nil)
+
+            let message = "保存下载数据到 = \(destinationPath)"
+
+            self.displayAlertWithTitle("Success", message: message)
+
+
+        }else{
+            self.displayAlertWithTitle("Error", message: "不能下载这数据,一个错误抛出")
+        }
+
+
+
+    })
+
+    task.resume() //这个是启动任务的,不调用,则不会执行请求
+
+}
+
+
+func displayAlertWithTitle(title:String,message:String){
+
+    let controller = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+    controller.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+    presentViewController(controller, animated: true, completion: nil)
+}
+
+
+///
+
+override func didReceiveMemoryWarning() {
+    super.didReceiveMemoryWarning()
+    // Dispose of any resources that can be recreated.
+}
+</code></pre>
+
+<p>}</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift_mutating]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/01/04/Swift-mutating/"/>
+    <updated>2016-01-04T10:33:02+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/01/04/Swift-mutating</id>
+    <content type="html"><![CDATA[<h3>方法添加 mutating 关键字</h3>
+
+<!--more-->
+
+
+<p>在swift中，enum和struct与C语言中的不同是：在Swift中我们可以给枚举和结构体添加方法，而C语言中不可以
+在这些方法中，我们可以任意获取属性的值，但是默认情况下不允许修改属性的值。我们需要添加mutating关键字，这样就可以对属性进行修改</p>
+
+<p>示例代码
+在结构体中的方法中添加mutating关键字，实现在方法内部修改属性的值</p>
+
+<pre><code>struct Point {
+
+var x = 0, y = 0
+
+// 不添加 mutating 关键字，不能在实例方法中修改属性值
+mutating func moveXBy(x: Int, yBy y: Int) {
+    self.x += x
+    self.y += y
+}
+}
+</code></pre>
+
+<p>在枚举中的方法中添加mutating关键字，实现在方法内部修改自身的值</p>
+
+<pre><code>enum ChangeStateSwitch {
+
+case Off, Low, High
+
+// 不添加 mutating 关键字，不能在实例方法中修改属性值
+mutating func next() {
+    switch self {
+    case .Off:
+        self = .Low
+    case .Low:
+        self = .High
+    case .High:
+        self = .Off
+    }
+}
+}
+</code></pre>
+
+<p>将protocol的方法声明为mutating</p>
+
+<p>在声明协议的时候，给协议方法添加mutating关键字，针对结构体和枚举来说，会有很大的帮助，这样，结构体和枚举在这个协议方法中就可以实现修改属性的值了</p>
+
+<pre><code>protocol MyProtocol {
+mutating func change()
+}
+</code></pre>
+
+<p>当我们的结构体遵守了协议，实现协议方法的时候，才可以在协议方法中对属性进行修改，否则直接报错</p>
+
+<pre><code>struct MyCar: MyProtocol {
+var price = 3459234.23
+
+mutating func change() {
+    price = 56783.2
+}
+}
+</code></pre>
+
+<p>对于类来说，协议方法中添加了mutating是无意义的，因为类中的方法本身就可以修改变量</p>
+
+<pre><code>class Car: MyProtocol {
+
+var price = 8923.2
+
+func change() {
+    price = 3243.2
+}
+
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Swift_lazy()延迟存储属性]]></title>
+    <link href="http://zyj179638121.github.io/blog/2016/01/04/Swift-lazy-%E5%BB%B6%E8%BF%9F%E5%AD%98%E5%82%A8%E5%B1%9E%E6%80%A7/"/>
+    <updated>2016-01-04T10:28:37+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2016/01/04/Swift-lazy-延迟存储属性</id>
+    <content type="html"><![CDATA[<p>所谓的延迟存储属性，就是我们OC中所谓的懒加载对象，也就是把创建对象的步骤放在重写的getter方法中进行。这样，只有当我们使用这个属性的getter方法的时候，才会创建对象，可以为我们节省不必要得内存开销。</p>
+
+<!--more-->
+
+
+<p>在OC中，UIViewController的view属性是懒加载对象，还有，UITableViewCell的textLabel、detailTextLabel、imageView属性也都是懒加载对象，只有当我们使用的时候才会被创建。除了这些，我们自己也可以写很多。</p>
+
+<p>那么，在Swift中，如何实现所谓的懒加载对象呢？</p>
+
+<p>在Swift中，只需要一个lazy关键字即可实现，叫做延迟存储属性!</p>
+
+<p>首先看看OC中如何实现懒加载对象的吧。。。</p>
+
+<pre><code>@interface ViewController ()
+
+// 声明可变数组属性
+@property (nonatomic, strong) NSMutableArray    *allDataArray;
+
+@end
+
+
+
+@implementation ViewController
+
+// 重写getter方法，成为懒加载对象
+- (NSMutableArray *)allDataArray
+{
+if (_allDataArray == nil) {
+    self.allDataArray = [NSMutableArray array];
+}
+return _allDataArray;
+}
+
+- (void)viewDidLoad
+{
+[super viewDidLoad];
+    // 当我们访问allDataArray的getter方法的时候，数组才被创建
+    [self.allDataArray addObject:@"first object"];
+}
+
+@end
+</code></pre>
+
+<p>在Swift中，普通的存储属性这样声明，当我们创建当前类的对象时候，属性也被创建了</p>
+
+<pre><code>class DataManager: NSObject {
+
+// 声明可变数组属性
+let allDataArray = NSMutableArray()
+
+}
+
+// 创建对象
+let manager = DataManager()
+</code></pre>
+
+<p>当manager对象被创建的时候，allDataArray数组就被创建，如果我们长时间不使用allDataArray数组，这块空间就被浪费了，可以改成如下写法：在属性声明前面添加lazy关键字</p>
+
+<pre><code>class DataManager2: NSObject {
+
+// 声明可变数组属性
+lazy var allDataArray = NSMutableArray()
+
+}
+
+// 创建对象
+let manager2 = DataManager2()
+
+// 使用allDataArray属性
+manager2.allDataArray.addObject("first obj")
+</code></pre>
+
+<p>在属性前面添加一个lazy关键字，这个属性就成了延迟存储属性，或者叫做懒加载对象。意思就是：只有当我们使用这个属性的时候，这个对象才被创建。如果我们不使用这个对象，也不会造成我们内存的浪费了。</p>
+
+<p>注意:延迟存储属性必须是变量(var),不可以是常量(let)</p>
+
+<p>还可以有如下写法：</p>
+
+<pre><code>class DataManager3: NSObject {
+
+// 声明延迟存储属性，当调用的时候才被创建
+lazy var allDataArray: NSMutableArray = {
+
+        let array = NSMutableArray()
+        array.addObject("first")
+        array.addObject("second")
+        return array
+
+    }()
+}
+</code></pre>
+
+<p>   在项目中，某些地方使用延迟存储属性可以提高我们的代码质量，慢慢习惯使用吧</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Guard]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/12/16/Guard/"/>
+    <updated>2015-12-16T16:08:17+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/12/16/Guard</id>
+    <content type="html"><![CDATA[<p>当你查看这篇文章时，肯定是看到了代码中使用了guard特性，这样，这篇文章能解决你的疑惑
+不过直接学习的也没关系，照样可以让你学会guard，开始吧。。。</p>
+
+<p>guard特性是在Swift 2.0后推出的，所以请使用Xcode 7.X版本来编写代码</p>
+
+<p>很多人都疑惑guard和if..else..到底有什么瓜葛，向下看，慢慢解释</p>
+
+<!--more-->
+
+
+<p>guard语句和if..else..语句有类似的地方，都是做判断处理
+与if语句相同的是，guard也是基于一个表达式的布尔值去判断一段代码是否该被执行
+与if语句不同的是，guard只有在条件不满足的时候才会执行这段代码
+guard语句有且仅有else语句，当条件不成立时，执行else部分；当条件成立时，执行guard后面的代码
+guard中声明的变量或者常量，在guard下面可以使用，但不能在else分支中使用</p>
+
+<h4>guard的使用</h4>
+
+<p>我们以今年高考为例，在进入考场时一般都会检查身份证和准考证，我们写这样一个方法：</p>
+
+<pre><code>func checkUp(person: [String: String!]) {
+// 检查身份证
+guard let id = person["id"] else {
+    print("没有携带身份证，禁止考试")
+    return
+}
+
+// 检查准考证
+guard let examNumber = person["examNumber"] else {
+    print("没有携带准考证，禁止考试")
+    return
+}
+
+// 身份证和准考证齐全，可以进入考试
+print("学号：\(id)  准考证号：\(examNumber) 可以进行考试...")
+</code></pre>
+
+<p>}</p>
+
+<pre><code>checkUp(["id": "xiaoze,maliya", "examNumber": "1302831992"])
+</code></pre>
+
+<p>详细看下面的解释(慢慢体会、慢慢体会、慢慢体会)，一共6句话，相信可以让你了然：</p>
+
+<p>guard很奇怪，只有一个else分支。
+guard没有条件成立的分支，确有条件不成立的分支。
+其实是这样的：
+当条件不成立的时候，会执行else分支，我们可以做一些执行转换语句，比如：return、break、continue或者throws
+当条件成立的时候，会直接过掉guard语句，执行下面的代码
+并且，我们在guard中声明的变量或者常量，在下面的区域内都可以使用。作用域看起来比较奇怪，但是非常实用
+这段代码，比我们写if..else..会好一些，语法简洁，判断了我们想要判断的情况，并且也不需要再次强制解包的代码。</p>
+
+<h4>guard和if..else..的比较</h4>
+
+<p>if..else的使用</p>
+
+<pre><code>func printInfo(age: Int?) {
+// 判断age不为空，并且判断是否大于等于0
+if age == nil || age &lt; 0 {
+    return
+}
+
+// 打印
+print(age!)
+}
+</code></pre>
+
+<p>在OC中，这是我们正常判断的一种写法，但是这种写法，存在一些小缺陷：</p>
+
+<p>我们在检查一个不符合我们期望的值！而非检查我们期望的值！如果我们添加了太多这样的判断，我们的代码就会变得不好理解
+如果前面都通过了，我们在使用参数的时候，还需要强制解包
+可选绑定</p>
+
+<pre><code>func printInfo2(age: Int?) {
+// 判断age不为空，并且大于0再打印
+if let age = age where age &gt; 0 {
+
+    // 如果条件满足，执行这里
+    print(age)
+}
+
+// 如果条件值不符合，就会执行这里的代码
+}
+</code></pre>
+
+<p>这种写法虽然解决了第一种写法的问题，但却引入了新问题
+把要写的代码放在了条件中，而不是之后，当条件很多的时候，代码可读性会非常的差</p>
+
+<h4>通过guard解决问题</h4>
+
+<pre><code>func printInfo3(age: Int?) {
+// 判断age不为空，并且大于0再打印
+guard let age = age where age &gt; 0 else {
+    // 如果条件不成立，则执行这里，直接返回
+    return
+}
+
+// 当条件符合的时候，执行这里，并且还不需要强制解包了
+print(age)
+}
+</code></pre>
+
+<h4>guard的好处</h4>
+
+<p>是对你所期望的条件做检查，而不是非期望值
+如果通过了条件判断，可选类型的变量在guard语句被调用的范围内会被自动的拆包，并且可选变量的作用域是函数内，非常方便
+对你所不期望的情况早做检查，使得你写的函数更易读，更易维护</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[使用WKWebView替换UIWebView]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/"/>
+    <updated>2015-11-20T17:11:31+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/11/20/使用WKWebView替换UIWebView</id>
+    <content type="html"><![CDATA[<h2>WKWebView替换UIWebView</h2>
+
+<p> 开发App的过程中，常常会遇到在App内部加载网页，通常用UIWebView加载。这个自iOS2开始使用的网页加载器一直是开发的心病：加载速度慢，占用内存多，优化困难。如果加载网页多，还可能因为过量占用内存而给系统kill掉。各种优化的方法效果也不那么明显iOS8以后，苹果推出了新框架Wekkit，提供了替换UIWebView的组件WKWebView。各种UIWebView的问题没有了，速度更快了，占用内存少了，一句话，WKWebView是App内部加载网页的最佳选择！</p>
+
+<!--more-->
+
+
+<p>先看下 WKWebView的特性：</p>
+
+<ul>
+<li>1.在性能、稳定性、功能方面有很大提升（最直观的体现就是加载网页是占用的内存，模拟器加载百度与开源中国网站时，WKWebView占用23M，而UIWebView占用85M）；</li>
+<li>2.允许JavaScript的Nitro库加载并使用（UIWebView中限制）；</li>
+<li>3.支持了更多的HTML5特性；</li>
+<li>4.高达60fps的滚动刷新率以及内置手势；</li>
+<li><p>5.将UIWebViewDelegate与UIWebView重构成了14类与3个协议（查看苹果官方文档）；
+然后从以下几个方面说下WKWebView的基本用法：</p></li>
+<li><p>1 加载网页</p></li>
+<li>2 加载的状态回调</li>
+<li>3 新的WKUIDelegate协议</li>
+<li>4 动态加载并运行JS代码</li>
+<li>5 webView 执行JS代码</li>
+<li>6 JS调用App注册过的方法
+
+<h3>一、加载网页</h3>
+
+<p>加载网页或HTML代码的方式与UIWebView相同，代码示例如下：</p>
+
+<pre><code>  WKWebView *webView = [[WKWebView alloc] initWithFrame:self.view.bounds];
+  [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.baidu.com"]]];
+  [self.view addSubview:webView];
+</code></pre>
+
+<h3>二、加载的状态回调 （WKNavigationDelegate）</h3>
+
+<p>用来追踪加载过程（页面开始加载、加载完成、加载失败）的方法：</p>
+
+<pre><code>  // 页面开始加载时调用
+  - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation;
+  // 当内容开始返回时调用
+  - (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation;
+  // 页面加载完成之后调用
+  - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation;
+  // 页面加载失败时调用
+  - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation;
+</code></pre>
+
+<p>页面跳转的代理方法：</p>
+
+<pre><code>  // 接收到服务器跳转请求之后调用
+  - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation;
+  // 在收到响应后，决定是否跳转
+  - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler;
+  // 在发送请求之前，决定是否跳转
+  - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;
+</code></pre>
+
+<h3>三、新的WKUIDelegate协议</h3>
+
+<p>  这个协议主要用于WKWebView处理web界面的三种提示框(警告框、确认框、输入框)，下面是警告框的例子:</p>
+
+<pre><code>  /**
+   *  web界面中有弹出警告框时调用
+   *
+   *  @param webView           实现该代理的webview
+   *  @param message           警告框中的内容
+   *  @param frame             主窗口
+   *  @param completionHandler 警告框消失调用
+   */
+  - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(void (^)())completionHandler;
+</code></pre>
+
+<h3>四、动态加载并运行JS代码</h3>
+
+<p>用于在客户端内部加入<code>JS</code>代码，并执行，示例如下：</p>
+
+<pre><code>  // 图片缩放的js代码
+  NSString *js = @"var count = document.images.length;for (var i = 0; i &lt; count; i++) {var image = document.images[i];image.style.width=320;};window.alert('找到' + count + '张图');";
+  // 根据JS字符串初始化WKUserScript对象
+  WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+  // 根据生成的WKUserScript对象，初始化WKWebViewConfiguration
+  WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+  [config.userContentController addUserScript:script];
+  _webView = [[WKWebView alloc] initWithFrame:self.view.bounds configuration:config];
+  [_webView loadHTMLString:@"&lt;head&gt;&lt;/head&gt;&lt;imgea src='http://www.nsu.edu.cn/v/2014v3/img/background/3.jpg' /&gt;"baseURL:nil];
+  [self.view addSubview:_webView];
+</code></pre>
+
+<h3>五、webView 执行JS代码</h3>
+
+<p>用户调用用JS写过的代码，一般指服务端开发的：</p>
+
+<pre><code>  //javaScriptString是JS方法名，completionHandler是异步回调block
+  [self.webView evaluateJavaScript:javaScriptString completionHandler:completionHandler];
+</code></pre>
+
+<h3>六、JS调用App注册过的方法</h3>
+
+<p>再WKWebView里面注册供JS调用的方法，是通过    <code>WKUserContentController</code>类下面的方法：</p>
+
+<pre><code>  - (void)addScriptMessageHandler:(id     &lt;WKScriptMessageHandler&gt;)scriptMessageHandler name:(NSString *)name;
+</code></pre>
+
+<p><code>scriptMessageHandler</code>是代理回调，JS调用name方法后，OC会调用<code>scriptMessageHandler</code>指定的对象。</p></li>
+</ul>
+
+
+<p><code>JS</code>在调用OC注册方法的时候要用下面的方式：</p>
+
+<pre><code>window.webkit.messageHandlers.&lt;name&gt;.postMessage(&lt;messageBody&gt;)
+</code></pre>
+
+<p>注意，name(方法名)是放在中间的，messageBody只能是一个对象，如果要传多个值，需要封装成数组，或者字典。整个示例如下：</p>
+
+<pre><code>    //OC注册供JS调用的方法
+    [[_webView configuration].userContentController addScriptMessageHandler:self name:@"closeMe"];
+
+    //OC在JS调用方法做的处理
+    - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+    {
+NSLog(@"JS 调用了 %@ 方法，传回参数 %@",message.name,message.body);
+</code></pre>
+
+<p>}</p>
+
+<pre><code>//JS调用
+window.webkit.messageHandlers.closeMe.postMessage(null);
+</code></pre>
+
+<p>如果你在self的dealloc打个断点，会发现self没有释放！这显然是不行的！谷歌后看到一种解决方法，如下：</p>
+
+<pre><code>@interface WeakScriptMessageDelegate : NSObject&lt;WKScriptMessageHandler&gt;
+
+@property (nonatomic, weak) id&lt;WKScriptMessageHandler&gt; scriptDelegate;
+
+- (instancetype)initWithDelegate:(id&lt;WKScriptMessageHandler&gt;)scriptDelegate;
+
+@end
+
+@implementation WeakScriptMessageDelegate
+
+- (instancetype)initWithDelegate:(id&lt;WKScriptMessageHandler&gt;)scriptDelegate
+{
+self = [super init];
+if (self) {
+    _scriptDelegate = scriptDelegate;
+}
+return self;
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+{
+[self.scriptDelegate userContentController:userContentController didReceiveScriptMessage:message];
+}
+
+@end
+</code></pre>
+
+<p>思路是另外创建一个代理对象，然后通过代理对象回调指定的self，</p>
+
+<pre><code>WKUserContentController *userContentController = [[WKUserContentController alloc] init];    
+[userContentController addScriptMessageHandler:[[WeakScriptMessageDelegate alloc] initWithDelegate:self] name:@"closeMe"];
+</code></pre>
+
+<p>运行代码，self释放了，WeakScriptMessageDelegate却没有释放啊啊啊！
+还需在self的dealloc里面 添加这样一句代码：</p>
+
+<pre><code>[[_webView configuration].userContentController removeScriptMessageHandlerForName:@"closeMe"];
+</code></pre>
+
+<p>OK，圆满解决问题！</p>
+
+<p>目前，大多数App需要支持iOS7以上的版本，而WKWebView只在iOS8后才能用，所以需要一个兼容性方案，既iOS7下用UIWebView，iOS8后用WKWebView。这个库提供了这种兼容性方案：<a href="https://github.com/wangyangcc/IMYWebView">WKWebView</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[3DTouch、ShortcutItem、Peek and Pop]]></title>
     <link href="http://zyj179638121.github.io/blog/2015/11/10/3DTouch%E3%80%81ShortcutItem%E3%80%81Peek-And-Pop/"/>
     <updated>2015-11-10T11:01:28+08:00</updated>
@@ -457,6 +1102,448 @@ NSMutableApplicationShortcutItem</p>
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Swiftype添加站内搜索]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/10/01/Swiftype%E6%B7%BB%E5%8A%A0%E7%AB%99%E5%86%85%E6%90%9C%E7%B4%A2/"/>
+    <updated>2015-10-01T16:59:23+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/10/01/Swiftype添加站内搜索</id>
+    <content type="html"><![CDATA[<h2>利用swiftype为hexo添加站内搜索</h2>
+
+<p>有了博客，写了辣么多文章没有站内搜索功能怎么行！废话不说开始吧。</p>
+
+<h3>到swiftype网站注册账号</h3>
+
+<p>首先，要去swiftype的网站<a href="https://swiftype.com">https://swiftype.com</a>注册一个账号，然后根据指引建立好自己网站对应的索引。注册以后有30天高级账户的使用（那种有可以建立多个搜索引擎、多账户共同管理、一个引擎index多个域名的功能的账户）。</p>
+
+<!--more-->
+
+
+<h4>创建一个引擎</h4>
+
+<p><img src="http://i5.tietuku.com/ac4a8c51a6325812.png" alt="" /></p>
+
+<h4>给自己的网站建立一个索引</h4>
+
+<p><img src="http://www.jerryfu.net/img/search-engine-for-hexo-with-swiftype-v2/2.jpg" alt="" /></p>
+
+<h4>输入自己网站的网址</h4>
+
+<p><img src="http://i5.tietuku.com/aa499a1200b4e7ac.png" alt="" /></p>
+
+<h4>给创建的搜索引擎起个名字</h4>
+
+<p><img src="http://i5.tietuku.com/a29b2d4d88f6c370.png" alt="" /></p>
+
+<h4>添加引擎成功</h4>
+
+<p><img src="http://i12.tietuku.com/5243bceb97eba65a.png" alt="" /></p>
+
+<h3>添加配置</h3>
+
+<p><img src="http://www.jerryfu.net/img/search-engine-for-hexo-with-swiftype-v2/9.jpg" alt="" /></p>
+
+<h4>跳转到配置页面</h4>
+
+<p><strong>SEARCH RESULTS 、AUTO COMPLETE、 COLORS改不改随意，不想折腾保持默认即可</strong></p>
+
+<p><img src="http://i12.tietuku.com/795de0220d9b2bf8.png" alt="" /></p>
+
+<h4>设置搜索失败界面</h4>
+
+<p><img src="http://i12.tietuku.com/36b26daa6290f980.png" alt="" /></p>
+
+<h4>设置搜索结果页面</h4>
+
+<p><strong>如果不配置的话默认的结果展现方式是这个样子的（弹出一个结果展现框）：</strong></p>
+
+<p><img src="http://www.jerryfu.net/img/search-engine-for-hexo-with-swiftype-v2/14.jpg" alt="" /></p>
+
+<p><strong>如果想要实现单开一个页面显示搜索结果的话就要进行一下配置</strong></p>
+
+<p><img src="http://i12.tietuku.com/d17740d0b30177a3.png" alt="" /></p>
+
+<p><strong>最后点击保存就可以了。接下来选择OVERVIEW</strong>
+<img src="http://i12.tietuku.com/c7a13a10340eb487.png" alt="" /></p>
+
+<p><strong>选择Install Search</strong>
+<img src="http://i12.tietuku.com/8532254cdff8371a.png" alt="" /></p>
+
+<h4>复制你的swiftype 搜索引擎的 key</h4>
+
+<p><img src="http://i5.tietuku.com/f54d8f83f2625c6f.png" alt="" /></p>
+
+<h3>最后</h3>
+
+<p>然后，编辑 站点配置文件，新增 swiftype_key 字段，值为你的 swiftype 搜索引擎的 key。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[NSURLSession下载与缓存]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/09/10/NSURLSession%E4%B8%8B%E8%BD%BD%E4%B8%8E%E7%BC%93%E5%AD%98/"/>
+    <updated>2015-09-10T10:00:25+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/09/10/NSURLSession下载与缓存</id>
+    <content type="html"><![CDATA[<p>NSURLSession下载与缓存
+iOS9要求网络请求需要使用NSURLSession,那么本篇文章
+就使用NSURLsession来实现视频的下载,图片的下载、取消下载、恢复下
+载和缓存功能，期望与大家一起学习。</p>
+
+<!--more-->
+
+
+<p>NSURLSessionConfiguration(参数配置类)</p>
+
+<p>NSURLSession状态同时对应着多个连接,不像之前使用共享的一个全局状态。会话是通过工厂方法（类方法)来创建对象
+NSURLSessionConfiguration。</p>
+
+<p>总共有三种会话：</p>
+
+<ul>
+<li><p>1.defaultSessionConfiguration 默认的，进程内会话</p></li>
+<li><p>2.ephemeralSessionConfiguration短暂的（内
+存），进程内会话</p></li>
+<li><p>3.backgroundSessionConfigurationWithIdentifier后台会话</p></li>
+</ul>
+
+
+<p>相关属性</p>
+
+<pre><code>//后台任务的标识符
+
+@property (nullable, readonly, copy) NSString *id entifier;
+
+//缓存的策略
+
+@property NSURLRequestCachePolicy requestCachePolicy;
+
+//请求超时时长
+
+@property NSTimeInterval timeoutIntervalForRequest;
+
+//网络服务类型
+
+@property NSURLRequestNetworkServiceType networkServiceType;
+
+//是否在非无线的情况下请求网络
+
+@property BOOL allowsCellularAccess;
+</code></pre>
+
+<h4>手动下载视频</h4>
+
+<h4>步骤：</h4>
+
+<p>在Info.plist中添加<code>NSAppTransportSecurity</code>类型Dictionary。
+在<code>NSAppTransportSecurity</code>下添加<code>NSAllowsArbitraryLoads</code>类型Boolean,值设为YES;
+Xcode7需要添加此条支持http</p>
+
+<p>在工程内引入<code>AVFoundation</code>框架，并在相关类引入AVKit、AVFoundation头文件;</p>
+
+<p>遵守<code>NSURLSessionDelegate</code>，<code>NSURLSessionDownloadDelegate</code>协议；
+准备一个MP4格式的url，进行下载；
+将下载完成的视频资源存入本地，并进行播放。</p>
+
+<h4>声明相关属性</h4>
+
+<pre><code> //下载任务  
+ @property (nonatomic, strong)NSURLSessionDownloadTask *downTask;  
+
+ //网络会话  
+ @property (nonatomic, strong)NSURLSession * downLoadSession;
+</code></pre>
+
+<h4>配置相关参数并下载</h4>
+
+<pre><code>    //参数设置类  简单的网络下载使用             
+defaultSessionConfiguration即可
+NSURLSessionConfiguration          *sessionConfig =        
+[NSURLSessionConfiguration
+defaultSessionConfiguration];
+
+ //创建网络会话  
+ self.downLoadSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:[NSOperationQueue new]];
+
+
+ //数据请求  
+ /*
+  *@param URL 资源url  
+  *@param timeoutInterval 超时时长
+  */
+ NSURLRequest *imgRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:MP3URL] cachePolicy:5 timeoutInterval:60.f];
+
+ //创建下载任务  
+ self.downTask = [self.downLoadSession downloadTaskWithRequest:imgRequest];
+
+ //启动下载任务  
+ [self.downTask resume];
+</code></pre>
+
+<h4>实现代理方法</h4>
+
+<pre><code>  #pragma mark 下载过程
+
+  -(void)URLSession:(NSURLSession *)sessiondownloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
+{
+   //获取下载进度
+  double currentProgress = totalBytesWritten / (double)totalBytesExpectedToWrite;
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+
+   //进行UI操作  设置进度条
+
+    self.downLoadProgress.progress = currentProgress;
+
+});
+
+  #pragma mark 下载完成 无论成功失败
+
+ -(void)URLSession:(NSURLSession *)session task: (NSURLSessionTask *)task didCompleteWithError:(NSError *)error
+ {
+
+    NSLog(@" function == %s, line == %d, error ==  %@",__FUNCTION__,__LINE__,error);
+
+ }
+   #pragma mark - 下载成功 获取下载内容
+ -(void)URLSession:(NSURLSession *)session   downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
+ {
+//存储本地
+
+//1.获取Documents文件夹路径 （不要将视频、音频等较大资源存储在Caches路径下）
+    *方法一
+    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) lastObject];
+
+    *方法二
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSURL * documentsDirectory = [fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0];
+
+   //2.创建资源存储路径
+   NSString *appendPath = [NSString stringWithFormat:@"/new.mp4"];
+   NSString *file = [documentsPath stringByAppendingString:appendPath];
+
+   //3.将下载好的视频资源存储在路径下
+
+  //删除之前相同路径的文件
+    BOOL remove  = [manager removeItemAtPath:file error:nil];
+
+  //将视频资源从原有路径移动到自己指定的路径
+    BOOL success = [manager copyItemAtPath:location.path toPath:file error:nil];
+
+    if (success) {
+
+  //回到主线程进行本地视频播放
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+    //创建视频播放的本地路径
+
+    *** 请使用此方法创建本地路径
+    NSURL *url = [[NSURL alloc]initFileURLWithPath:file];
+
+    *** 此方法创建的路径无法播放 不是一个完整的路径
+   //NSURL *url2 = [[NSURL alloc]initWithString:file];
+
+    //系统的视频播放器
+    AVPlayerViewController *controller = [[AVPlayerViewController alloc]init];
+    //播放器的播放类
+    AVPlayer * player = [[AVPlayer alloc]initWithURL:url];
+
+    controller.player = player;
+    //自动开始播放
+    [controller.player play];
+    //推出视屏播放器
+    [self presentViewController:controller animated:YES completion:nil];
+
+
+    });
+}
+
+ }
+NSURLSessionDownloadTask支持取消下载，可以在下载过程中随时取消继续下载，同时也可以实现恢复下载。
+</code></pre>
+
+<h4>取消下载 cancelByProducingResumeData</h4>
+
+<pre><code>//用当前NSURLSessionDownloadTask对象去调用取消下载
+
+ [self.downTask cancelByProducingResumeData:
+^(NSData * _Nullable resumeData) {
+
+ //全局变量 接收当前下载的资源
+  self.data = resumeData;
+}
+ //将当前下载任务置为空
+  self.downTask = nil;
+</code></pre>
+
+<h4>恢复下载 downloadTaskWithResumeData</h4>
+
+<pre><code>//恢复下载 实际上是建立了一个新的下载任务 去继续之前的下载
+
+self.downTask = [self.downLoadSession downloadTaskWithResumeData:self.data];
+
+   //开启任务     
+  [self.downTask resume];
+
+}
+</code></pre>
+
+<h4>自动缓存</h4>
+
+<p>上面讲到的是自己去手动操控整个下载过程，那么，很多伙伴就会讲这样是不是太麻烦了。如果你了解了NSURLSession的缓存策略，那么，你就会发现，我们这么写确实是太麻烦了，那么下面我们就来学习一下NSURsession的自动缓存。</p>
+
+<p>在开始之前，先介绍一下<code>NSURLRequestUseProtocolCachePolicy</code>的几种缓存策略：</p>
+
+<ul>
+<li><p>1>NSURLRequestUseProtocolCachePolicy = 0, 默认的缓存策略， 如果缓存不存在，直接从服务端获取。如果缓存存在，
+会根据response中的Cache-Control字段判断下一步操作，如: Cache-Control字段为must-revalidata, 则询问服务端该数据是否有更新，无更新的话直接返回给用户缓存数据，若已更新，则请求服务端.</p></li>
+<li><p>2>NSURLRequestReloadIgnoringLocalCacheData = 1, 忽略本地缓存数据，直接请求服务端.</p></li>
+<li><p>3>NSURLRequestIgnoringLocalAndRemoteCacheData = 4, 忽略本地缓存，代理服务器以及其他中介，直接请求源服务端.</p></li>
+<li><p>4>NSURLRequestReloadIgnoringCacheData = NSURLRequestReloadIgnoringLocalCacheData</p></li>
+<li><p>5>NSURLRequestReturnCacheDataElseLoad = 2, 有缓存就使用，不管其有效性(即忽略Cache-Control字段), 无则请求服务端.</p></li>
+<li><p>6>NSURLRequestReturnCacheDataDontLoad = 3, 死活加载本地缓存. 没有就失败. (确定当前无网络时使用).</p></li>
+<li><p>7>NSURLRequestReloadRevalidatingCacheData = 5, 缓存数据必须得得到服务端确认有效才使用(貌似是NSURLRequestUseProtocolCachePolicy中的一种情况)
+因此，我们可以根据自己的需求去设置不同的缓存策略，而默认的就是如果有缓存就通过缓存获取数据，没有缓存就去请求网络数据。
+这里，我们通过一个请求图片的例子，来窥探一下神奇的自动缓存。</p></li>
+</ul>
+
+
+<p>代码：</p>
+
+<pre><code>    //创建一个UIImageView+MyImageView.h的类目，
+  在.h添加一个方法
+ - (void)loadIamgeWithURL:(NSString *)urlString
+  //在.m去实现此方法  
+ - (void)loadIamgeWithURL:(NSString *)urlString
+{
+
+//创建下载图片的url
+  NSURL *url = [NSURL URLWithString:urlString];
+
+//创建网络请求配置类
+  NSURLSessionConfiguration * configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+
+//创建网络会话
+  NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue new]];
+
+//创建请求并设置缓存策略以及超时时长
+  NSURLRequest *imgRequest = [NSURLRequest requestWithURL:url cachePolicy:0 timeoutInterval:30.f];
+   //*也可通过configuration.requestCachePolicy 设置缓存策略
+
+//创建一个下载任务
+  NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:imgRequest completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+
+  //下载完成后获取数据 此时已经自动缓存到本地，下次会直接从本地缓存获取，不再进行网络请求
+  NSData * data = [NSData dataWithContentsOfURL:location];
+
+  //回到主线程  
+   dispatch_async(dispatch_get_main_queue(), ^{
+
+  //设置图片      
+   self.image = [UIImage imageWithData:data];
+ });
+
+
+}];
+
+
+//启动下载任务
+ [task resume];
+
+ }
+</code></pre>
+
+<h3>swift下载任务</h3>
+
+<p>import UIKit</p>
+
+<p>class ViewController: UIViewController,NSURLSessionDelegate,NSURLSessionDataDelegate {</p>
+
+<pre><code>var session:NSURLSession!
+
+override func viewDidLoad() {
+    super.viewDidLoad()
+
+
+    //let config = NSURLSessionConfiguration.backgroundSessionConfiguration("back")//不赞成使用
+    //let config = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("back")//委托中不能使用,使用系统处理下载,就算APP没有运行了,也可以实现
+    //let config = NSURLSessionConfiguration.ephemeralSessionConfiguration();//这个是临时数据下载,适用于小数据下载
+    let config = NSURLSessionConfiguration.defaultSessionConfiguration()//默认配置
+    config.timeoutIntervalForRequest = 15 //连接超时时间
+
+    session = NSURLSession(configuration: config, delegate: self, delegateQueue:nil)//队列中,如果想要程序在主线程中执行,可以使用NSOperationQueue.mainQueue()
+
+    let url = NSURL(string: "http://www.wutongwei.com")
+
+
+    let task = session.dataTaskWithURL(url!, completionHandler: { (
+        data, response, error) -&gt; Void in
+
+
+        let str = NSString(data: data, encoding: NSUTF8StringEncoding)
+        println("Done!")
+
+        self.session.finishTasksAndInvalidate() //确保执行完成后,释放session
+
+
+        if error == nil {
+
+            let manager = NSFileManager()
+
+            //
+            var error:NSError?
+            var destinationPath = manager.URLForDirectory(NSSearchPathDirectory.CachesDirectory, inDomain: NSSearchPathDomainMask.UserDomainMask, appropriateForURL: url, create: true, error: &amp;error)!
+            //
+            let componenetsOfUrl = url?.absoluteString!.componentsSeparatedByString("/")
+            let index = componenetsOfUrl!.count - 1
+            let fileNameFromUrl = componenetsOfUrl![index]
+
+            destinationPath = destinationPath.URLByAppendingPathComponent(fileNameFromUrl)
+
+
+            //
+            manager.moveItemAtURL(url!, toURL: destinationPath, error: nil)
+
+            let message = "保存下载数据到 = \(destinationPath)"
+
+            self.displayAlertWithTitle("Success", message: message)
+
+
+        }else{
+            self.displayAlertWithTitle("Error", message: "不能下载这数据,一个错误抛出")
+        }
+
+
+
+    })
+
+    task.resume() //这个是启动任务的,不调用,则不会执行请求
+
+}
+
+
+func displayAlertWithTitle(title:String,message:String){
+
+    let controller = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+    controller.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+    presentViewController(controller, animated: true, completion: nil)
+}
+
+
+///
+
+override func didReceiveMemoryWarning() {
+    super.didReceiveMemoryWarning()
+    // Dispose of any resources that can be recreated.
+}
+</code></pre>
+
+<p>}</p>
+
+<p>通过这种缓存策略，我们就可以实现图片下载并自动缓存，当我们需要再次使用此资源的时候，它就会自动去本地缓存查找是否有已经下载好的图片资源，如果有就会直接去本地的，从而不需要再去进行网络请求。可以在下载完成后，将网络断开进行测试。
+总结
+本次主要是讲解了NSURLSession的下载，以及自动缓存策略。它的功能非常强大，还有很多没来得及细细研究，如果你也喜欢它😍，那就抓紧时间去研究吧~</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[使用WebViewJavascriptBridge实现OC与JS交互]]></title>
     <link href="http://zyj179638121.github.io/blog/2015/06/10/%E4%BD%BF%E7%94%A8WebViewJavascriptBridge%E5%AE%9E%E7%8E%B0OC%E4%B8%8EJS%E4%BA%A4%E4%BA%92/"/>
     <updated>2015-06-10T10:22:27+08:00</updated>
@@ -598,6 +1685,807 @@ OC调用JS</p>
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[iOS添加测试设备与调试]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/05/18/iOS%E6%B7%BB%E5%8A%A0%E6%B5%8B%E8%AF%95%E8%AE%BE%E5%A4%87%E4%B8%8E%E8%B0%83%E8%AF%95/"/>
+    <updated>2015-05-18T21:14:28+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/05/18/iOS添加测试设备与调试</id>
+    <content type="html"><![CDATA[<p><img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvdzn1oh9j20ic08jjrw.jpg" alt="" /></p>
+
+<blockquote><p>1.证书：安装到电脑上的<code>cer</code>文件，只有安装了证书的电脑，才可以进行真机调试</p>
+
+<p>2.App ID：就是应用程序的<code>Bundle ID</code>，每个应用程序都有一个唯一的<code>Bundle ID</code>，但是我们没必要为每一个应用程序都添加，我们可以使用通配符:<code>*</code>号</p>
+
+<p>3.测试设备UDID：每台设备都有唯一的标识码，叫做UDID，我们需要将测试设备的UDID添加到账号中，否则无法进行测试</p>
+
+<p>4.描述文件：里面包含：<code>证书</code>，<code>App ID</code>，<code>测试设备UDID</code>。就是用来描述，哪台电脑可以进行测试，哪台真机可以测试，哪个应用程序可以测试</p></blockquote>
+
+<!--more-->
+
+
+<h3>1.添加证书</h3>
+
+<p>1.首先，我们需要先登录开发者中心： <a href="https://developer.apple.com">开发者中心</a>，注意，需要使用付费过的账号
+2.点击开发者中心（Member Center）来到如下页面，然后点击选中区域，准备进行证书的生成
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvbbcl3hdj21ba0yewkl.jpg" alt="" />
+3.我们可以看到开发的三种方向，我们自然会选择<code>iOS开发方向</code>的内容，苹果已经告诉了我们操作的流程，分别是：<code>证书</code>、<code>应用程序标识</code>、<code>测试设备</code>、<code>描述文件</code>，我们按照步骤操作就好了，点击<code>Certificates</code>
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvbfai0z2j21j80vkjye.jpg" alt="" /></p>
+
+<p>4.选择<code>Certificates</code>下的<code>Pending</code>，在右侧点击<code>Certificate Signing Request</code>，或者<code>右上角的添加按钮</code>，都可以进行证书的添加
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvbhe4mqmj21hm12mthp.jpg" alt="" />
+5.选择真机调试的证书，下面的选项是添加远程推送的证书的，后面的文章中再介绍
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvbi3peeij214m0pkq6y.jpg" alt="" />
+6.直接点击本页下面的<code>Continue</code>按钮，继续操作
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvbj2vozhj21200g0q5a.jpg" alt="" />
+7.这个页面Balabalabala了很多，直接<code>Continue</code>按钮继续，忽略它
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvbk8t4i3j215410kdn3.jpg" alt="" />
+8.这里需要我们在电脑上创建一个证书，然后上传。在Mac电脑商找到<code>钥匙</code>串应用程序，在菜单里找到<code>证书助理</code>，然后选择<code>从证书颁发机构请求证书</code>，如下：
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvbmn71wvj20py0fwdjm.jpg" alt="" />
+9.重点就是选择存储到本地磁盘，其他内容随意，你喜欢就好
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvbnhpmmzj20y80o8whn.jpg" alt="" />
+10.之后会生成一个后缀是：<code>.certSigningRequest</code>的文件，保存到桌面
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvbp13bymj20nk09gmy0.jpg" alt="" />
+11.刚刚在电脑上创建的证书，需要上传，回到刚刚的网页，选择<code>Choose File...</code>按钮，上传刚刚生成的证书
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvbpz7mttj21500t4tdl.jpg" alt="" />
+12.点击<code>Generate</code>按钮，生成我们需要的证书
+13.生成之后，点击<code>Download</code>按钮，下载证书到本地，准备后面使用!
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvbrqc35hj214k0wsgqa.jpg" alt="" /></p>
+
+<blockquote><p>注意：一个账号只能生成一个真机调试证书，多个人只需要使用这一个即可。</p>
+
+<p>证书已经生成完毕，下面要做的就是注册App ID。</p></blockquote>
+
+<h3>2.注册APP ID</h3>
+
+<p>1.点击左侧<code>Identifiers</code>下面的<code>App IDs</code>，再点击右上角的<code>加号按钮</code>，进行我们App ID的添加
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvc205aqij21hy0k2tc6.jpg" alt="" /></p>
+
+<p>2.在Name输入框中，输入App ID的描述
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvc3c19y9j214u0todjq.jpg" alt="" />
+3.下面是让我们填写App ID的前缀，我们选择下面的模糊填写方式，就是可以使用<code>*</code>号来代替所有。上面需要输入精确的App ID。如果选择<code>Explicit App ID</code>，可以进行更多功能的测试，例如：Game Center、App Group、Push Notifications等等。但是，该App ID只能针对一个应用程序使用。我们现在添加通用的，所以选择下面的<code>Wildcard App ID</code>，输入类似<code>com.公司名.*</code>的标示符，也可以使用一个<code>*</code>号，代表所有：
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvc5elesxj214w0tmq93.jpg" alt="" />
+4.上面填好内容之后，滑到下面，选择<code>Continue</code>继续
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvc8iw99cj213812wjw4.jpg" alt="" />
+5.下面是让我们确认选中的内容，保证自己选择的内容无误后，点击<code>Submit</code>按钮，进行提交
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvc9w26pmj20vy0nadhl.jpg" alt="" /></p>
+
+<blockquote><p>注意：我们刚刚创建的是通用证书，不可进行远程推送的测试。如果需要测试更多功能，需要添加<code>Explict App ID</code>类型的App ID。</p>
+
+<p>App ID添加成功，下面，我们需要添加测试设备。</p></blockquote>
+
+<h3>3.添加测试设备</h3>
+
+<p>1.选择左侧<code>Devices</code>下的<code>All</code>，然后点击右上角的<code>添加</code>按钮，进行真机设备的添加
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvcoz1pbgj20ee0hs3zg.jpg" alt="" />
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvcq5u045j215403k0t2.jpg" alt="" />
+2.这里需要我们输入测试设备的名称(内容任意)和设备的UDID，那么，到哪里查看设备的UDID呢？
+使用数据线，将设备与电脑连接，打开<code>XCode</code>，点击菜单栏中的<code>Window</code>选项，选择<code>Devices</code>选项：
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvcrvzzajj20iy0g0wgc.jpg" alt="" />
+3.进到如下页面，选中你的设备，在右侧可以看到<code>Identifier</code>，右击拷贝其内容
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvcsm92wvj21900xcwop.jpg" alt="" />
+4. 然后将获取到的UDID粘贴到输入框中，直接点击<code>Continue</code>按钮，继续
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvcu1vlbaj212e0sqq69.jpg" alt="" />
+5. 确认内容无误，然后点击<code>Register</code>按钮，确认注册
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvcutfvnhj21520w60wz.jpg" alt="" />
+6.至此，我们添加了测试设备，马上就可以测试啦，继续..</p>
+
+<blockquote><p>注意：每个账号可以添加100个测试设备，即便使设备不可以，也是占用名额的，需要过完一年之后，才会自动清空。</p>
+
+<p>下面，生成描述文件，马上就快哦了..</p></blockquote>
+
+<h3>4.生成描述文件</h3>
+
+<p>1.选择<code>Provisioning Profiles</code>下面的<code>All</code>：
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvd190zonj20de0egwf5.jpg" alt="" /></p>
+
+<p>2.然后点击右上角的<code>添加</code>按钮，进行描述文件的生成
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvd2uyq15j214y044mxn.jpg" alt="" /></p>
+
+<p>3.我们要做的是测试，所以选择<code>iOS App Development</code>，之后<code>Continue</code>按钮继续
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvd3g8o9jj21520y6n1m.jpg" alt="" />
+4.描述文件中，需要App ID，这里选择我们刚刚生成的App ID
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvd4l46qzj214u0vqwiz.jpg" alt="" />
+5.描述文件中，需要证书，在这里选择我们刚刚创建的证书
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvdmvuijpj212m0t241q.jpg" alt="" />
+6.描述文件中，需要测试设备，这里直接选择<code>Select All</code>，可以让所有的测试设备都可以测试，然后点击<code>Continue</code>按钮继续
+<img src="http://ww4.sinaimg.cn/large/9c2363adgw1esvd6hohisj213e11qtd2.jpg" alt="" />
+7.添加了需要的信息后，输入描述文件的名称，然后点击<code>Generate</code>按钮，生成描述文件
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvd900f3aj20z20s477b.jpg" alt="" />
+8.生成描述文件之后，点击Download按钮，下载到本地，准备使用
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvda0i745j20zk0ygwi3.jpg" alt="" /></p>
+
+<blockquote><p>注意：描述文件生成需要:<code>1.App ID</code> <code>2.证书</code> <code>3.添加到此描述文件中的设备</code>，这三样，缺一不可</p>
+
+<p>OK，证书和描述文件都生成了，只差一步，马上大功告成。</p></blockquote>
+
+<h3>5.导入证书和描述文件</h3>
+
+<p>1.将测试设备使用数据线连接电脑，双击证书和描述文件，分别安装到电脑和测试设备上，之后就可以测试了
+<img src="http://ww1.sinaimg.cn/large/9c2363adgw1esvdfao8hsj20fs07m408.jpg" alt="" />
+2.创建空的工程，注意：这里输入的内容，需要与注册App ID输入的一直，如果注册的时候使用的是一个<code>*</code>号，则这里任意
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvdhoskspj214k0nwq5n.jpg" alt="" />
+3.注意点：这里选的版本需要小于等于你测试机的版本，否则测试机无法使用
+<img src="http://ww2.sinaimg.cn/large/9c2363adgw1esvdjoue3bj21bk0k8q6q.jpg" alt="" />
+4.最后一步，将测试设备选成真机，然后<code>cmd + R</code>运行就哦啦
+<img src="http://ww3.sinaimg.cn/large/9c2363adgw1esvdkuasu5j20ku02umxl.jpg" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[数据持久化的几种方式]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/05/14/%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/"/>
+    <updated>2015-05-14T16:07:04+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/05/14/数据持久化的几种方式</id>
+    <content type="html"><![CDATA[<h3>数据持久化是我们开发中经常涉及的问题,以下是本人对于数据持久化使用的基本了解,和大家分享下</h3>
+
+<hr />
+
+<!--more--> 
+
+
+<h3>1.数据持久化的方式</h3>
+
+<ul>
+<li>1.属性列表(一种XML文件)</li>
+<li>2.NSUserDefault(NSUserDefaults只支持： NSString, NSNumber, NSDate, NSArray, NSDictionary.）</li>
+<li>3.write to file</li>
+<li>4.sqlite (推荐使用FMDB进行管理)</li>
+<li>5.CoreData</li>
+</ul>
+
+
+<h3>2.沙盒(存文件时,应存在document路径下,在手机上运行app才能成功存储)</h3>
+
+<ul>
+<li>1.数据持久化的本质：数据保存成文件，存储到程序的沙盒中</li>
+<li>2.沙盒机制：沙盒的本质就是一个文件夹，名字是随机分配的</li>
+<li>3.模拟器路径内有可能包含多个系统版本的路径</li>
+<li><p>4.构成：document、library（cache、preference）、tmp、app程序包</p>
+
+<p>  通过代码查找各个文件的相对路径：
+    NSHomeDirectory（）—沙盒主路径
+    NSDocumentDirectory—documents文件夹
+    NSLibraryDirectory—Library文件夹
+    NSCacheDirectory—caches文件夹
+    NSTemporaryDirectory—tmp文件夹</p>
+
+<pre><code>    //获取沙盒主路径
+
+    NSString *homePath = NSHomeDirectory();
+    NSLog(@"%@",homePath);
+
+    pragma mark - objectAtIndex:0、firstObject、    lastObject、[0] 使用任意一个都是同一个文件(手机)
+
+
+   //document路径 (通常存放应用程序需要持久化使用的关键数据（用户数据），比如本地数据库等，iTunes在备份的时候会自动备份此文件夹)
+    NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, NO) objectAtIndex:0];
+    NSLog(@"%@",documentPath);
+
+  //library路径 （通常用来存储应用程序运行期间生成的持久数据，比如用户账户名等。应用程序退出后不会被删除文件夹内数据，但是iTunes备份时，不会备份此文件夹）
+  NSString *libraryPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) firstObject];
+  NSLog(@"%@",libraryPath);
+
+  //cache路径（运行期间的缓存文件：历史记录等）
+  NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+  NSLog(@"%@",cachePath);
+
+  //preference：应用程序的偏好设置，夜间模式等
+
+
+
+  //tmp路径（存放临时文件，比如下载的zip包，应用程序结束后被清除）
+  NSString *tmpPath = NSTemporaryDirectory();
+  NSLog(@"%@",tmpPath);
+
+
+  //BUndle（当前应用程序包）
+  //获取当前应用程序包
+  NSBundle *bundle = [NSBundle mainBundle];
+  //获取包的路径
+  //NSString *bundlePath = [bundle resourcePath];
+  //或者
+  NSString *bundlePath = [bundle bundlePath];
+  NSLog(@"%@",bundlePath);
+
+
+  //NSString *image = [bundle pathForResource:@"image" ofType:@"png"];
+
+  //NSString *interfacePath = [bundle pathForResource:@"news" ofType:@"txt"];
+  //NSLog(@"%@",image);
+</code></pre></li>
+</ul>
+
+
+<h3>3.简单对象写入文件（字符串、数组、字典、图片）</h3>
+
+<h4>字符串写入文件</h4>
+
+<pre><code>    NSString *incantation = @"等闲变却故人心，却道故人心易变";
+
+    NSString *path = NSHomeDirectory();
+    NSLog(@"%@",path);
+    path = [path stringByAppendingString:@"/纳兰容若.txt"];
+
+    //encoding：NSStringEncodingConversionAllowLossy 允许文件丢失
+    //NSStringEncodingConversionExternalRepresentation 不允许文件丢失
+    [incantation writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:nil];//（atomically：YES 指的是原子性，和我们声明属性时候的nonatomic非原子性类似的道理，选择YES意思就是说不能被中断，实际操作写入文件的时候，系统会先开辟一个内存空间，将字符串存入这个缓存中，再写入文件，而不是直接写入文件，这样就保证不会出现写入过程中突然中断导致只写入一部分的情况。选择NO即直接写入文件，可以被中断）
+
+
+     //从文件中获取字符串
+    NSString *resultString = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+            NSLog(@"%@",resultString);
+</code></pre>
+
+<h4>数组写入文件</h4>
+
+<pre><code>    NSArray *array = @[@"相怜相念倍相亲",@"一生一世一双人"];
+    NSString *path = NSHomeDirectory();
+    path = [path stringByAppendingPathComponent:@"王安石.txt"];
+
+    //写入
+    [array writeToFile:path atomically:YES];
+
+    //读取
+    NSArray *resultArr = [NSArray arrayWithContentsOfFile:path];
+    NSLog(@"%@",resultArr[0]);
+</code></pre>
+
+<h4>字典写入文件</h4>
+
+<pre><code>   NSDictionary *dict = @{@"周议":@"宁可我付天下人，不可天下人负我"};
+   NSString *path = NSHomeDirectory();
+   path = [path stringByAppendingString:@"/南阳.txt"];
+  //写入文件
+   [dict writeToFile:path atomically:YES];
+
+   //读取文件
+   NSDictionary *resultDict = [NSDictionary dictionaryWithContentsOfFile:path];
+   NSLog(@"%@",resultDict); 
+</code></pre>
+
+<h4>图片写入文件</h4>
+
+<pre><code>   UIImage *image = [UIImage imageNamed:@"image"];
+
+  //NSData *data = UIImagePNGRepresentation(image);
+   NSData *data1 = UIImageJPEGRepresentation(image, 1);//“1”表示图片压缩质量（不超过1，越小质量越差）
+
+   NSString *path = NSHomeDirectory();
+   path = [path stringByAppendingString:@"/gir.jpg"];
+   //写入文件
+   [data1 writeToFile:path atomically:YES];
+   //取出
+   UIImage *resultImg = [UIImage imageWithContentsOfFile:path];
+   NSLog(@"%@",resultImg); 
+</code></pre>
+
+<h4>复杂对象写入文件</h4>
+
+<ul>
+<li>1）复杂对象即Foundation 框架下不存在的数据类，例如自己创建的类</li>
+<li>2）复杂对象至少包含一个实例对象</li>
+<li><p>3）无法在程序内通过writeToFile 类型的方法写入文件中，只能转换为NSData，再通过writeToFile进行数据持久化</p></li>
+<li><p>4）归档：将复杂对象转换为NSData
+反归档：将NSData转换为复杂对象</p></li>
+<li><p>5）要想写入文件，复杂对象要遵循NSCoding协议，并实现协议方法</p></li>
+<li><p>6）复杂对象写入的文件在本地打不开</p></li>
+</ul>
+
+
+<p>注意：归档和反归档，只是辅助完成数据持久化的功能，本身不能数据持久化</p>
+
+<pre><code>#import "Person.h"
+
+@implementation Person
+
+//编码
+- (void)encodeWithCoder:(NSCoder *)aCoder{
+
+[aCoder encodeObject:_name forKey:@"name"];
+[aCoder encodeObject:_gender forKey:@"gender"];
+
+}
+//解码
+- (id)initWithCoder:(NSCoder *)aDecoder{
+if (self = [super init]) {
+    _name = [aDecoder decodeObjectForKey:@"name"];
+    _gender = [aDecoder decodeObjectForKey:@"gender"];
+}
+return self;
+}
+
+
+@end
+</code></pre>
+
+<h3>具体事例</h3>
+
+<pre><code> Person *person = [Person new];     
+ person.name = @"Anna";
+ person.gender = @"male";
+
+ NSString *path = NSHomeDirectory();
+ path = [path stringByAppendingString:@"/person.txt"];//此文件在本地打不开
+//对象归档的文件是保密的磁盘上无法查看文件中的内容
+
+//创建可变data，用来存放归档数据
+ NSMutableData *mutData = [[NSMutableData alloc] initWithCapacity:10];
+
+//创建归档对象
+ NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:mutData];
+
+//归档
+ [archiver encodeObject:person forKey:@"person"];
+//完成归档
+ [archiver finishEncoding];
+//写入文件
+ [mutData writeToFile:path atomically:YES];
+
+
+//使用data对象获取对象
+ NSData *data = [NSData dataWithContentsOfFile:path];
+//创建反归档对象
+ NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+//反归档
+ Person *p = [unarchiver decodeObjectForKey:@"person"];
+//完成反归档
+ [unarchiver finishDecoding];
+ NSLog(@"%@，%@",p.name,p.gender);
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Masonry:快速上手autoLayout]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/05/11/Masonry-%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8BautoLayout/"/>
+    <updated>2015-05-11T15:58:23+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/05/11/Masonry-快速上手autoLayout</id>
+    <content type="html"><![CDATA[<h2>前言</h2>
+
+<p>来源：里脊串的开发随笔（在此谢过分享者）</p>
+
+<p>纯手写代码所经历的关于页面布局的三个时期</p>
+
+<pre><code>MagicNumber -&gt; autoresizingMask -&gt; autolayout
+</code></pre>
+
+<!--more-->
+
+
+<ul>
+<li><p>在iphone1-iphone3gs时代 window的size固定为(320,480) 我们只需要简单计算一下相对位置就好了</p></li>
+<li><p>在iphone4-iphone4s时代 苹果推出了retina屏 但是给了码农们非常大的福利:window的size不变</p></li>
+<li><p>在iphone5-iphone5s时代 window的size变了(320,568) 这时autoresizingMask派上了用场(为啥这时候不用Autolayout? 因为还要支持ios5呗) 简单的适配一下即可</p></li>
+<li><p>在iphone6+时代 window的width也发生了变化(相对5和5s的屏幕比例没有变化) 终于是时候抛弃autoresizingMask改用autolayout了(不用支持ios5了 相对于屏幕适配的多样性来说autoresizingMask也已经过时了)</p></li>
+</ul>
+
+
+<p>那如何快速的上手autolayout呢? 说实话 当年ios6推出的同时新增了autolayout的特性 我看了一下官方文档和demo 就立马抛弃到一边了 因为实在过于的繁琐和啰嗦(有过经验的朋友肯定有同感)</p>
+
+<p>直到iphone6发布之后 我知道使用autolayout势在必行了 这时想起了以前在浏览Github看到过的一个第三方库Masonry 在花了几个小时的研究使用后 我就将autolayout掌握了(重点是我并没有学习任何的官方文档或者其他的关于autolayout的知识) 这就是我为什么要写下这篇文章来推荐它的原因</p>
+
+<h2>介绍</h2>
+
+<p>Masonry源码
+Masonry是一个轻量级的布局框架，拥有自己的描述语法，采用更优雅的链式语法封装自动布局，简洁明了并具有高可读性<code>而且同时支持iOS和Max OS X</code></p>
+
+<p>我们先来看一段官方的sample code来认识一下Masonry</p>
+
+<pre><code>[view1 mas_makeConstraints:^(MASConstraintMaker *make) {
+make.edges.equalTo(superview).with.insets(padding);
+}];
+</code></pre>
+
+<p>看到block里面的那句话: <code>make edges equalTo superview with insets</code>
+通过链式的自然语言 就把view1给autolayout好了 是不是简单易懂?</p>
+
+<h2>使用</h2>
+
+<p>看一下Masonry支持哪一些属性</p>
+
+<pre><code>@property (nonatomic, strong, readonly) MASConstraint *left;
+@property (nonatomic, strong, readonly) MASConstraint *top;
+@property (nonatomic, strong, readonly) MASConstraint *right;
+@property (nonatomic, strong, readonly) MASConstraint *bottom;
+@property (nonatomic, strong, readonly) MASConstraint *leading;
+@property (nonatomic, strong, readonly) MASConstraint *trailing;
+@property (nonatomic, strong, readonly) MASConstraint *width;
+property (nonatomic, strong, readonly) MASConstraint *height;
+@property (nonatomic, strong, readonly) MASConstraint *centerX;
+@property (nonatomic, strong, readonly) MASConstraint *centerY;
+@property (nonatomic, strong, readonly) MASConstraint *baseline;
+</code></pre>
+
+<p>这些属性与NSLayoutAttrubute的对照表如下</p>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/a3f1b5b3c8ecdfb3.png" alt="" /></p>
+
+<p>其中leading与left trailing与right 在正常情况下是等价的 但是当一些布局是从右至左时(比如阿拉伯文?没有类似的经验) 则会对调 换句话说就是基本可以不理不用 用left和right就好了</p>
+
+<p>在ios8发布后 又新增了一堆奇奇怪怪的属性(有兴趣的朋友可以去瞅瞅) Masonry暂时还不支持(不过你要支持ios6,ios7 就没必要去管那么多了)</p>
+
+<p>下面进入正题(为了方便 我们测试的superView都是一个size为(300,300)的UIView)</p>
+
+<p>下面 通过一些简单的实例来简单介绍如何轻松愉快的使用Masonry:</p>
+
+<h3>居中显示一个view</h3>
+
+<pre><code>- (void)viewDidLoad {
+
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+
+    UIView *sv = [UIView new];
+    [sv showPlaceHolder];
+    sv.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:sv];
+    [sv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.view);
+        make.size.mas_equalTo(CGSizeMake(300, 300));
+    }];
+
+}
+</code></pre>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/559d80622ffd45d0.png" alt="代码效果" /></p>
+
+<p>使用我之前写的MMPlaceHolder 可以看到superview已经按照我们预期居中并且设置成了适当的大小</p>
+
+<p>那么先看看这几行代码</p>
+
+<pre><code>//从此以后基本可以抛弃CGRectMake了
+UIView *sv = [UIView new];
+
+//在做autoLayout之前 一定要先将view添加到superview上 否则会报错
+[self.view addSubview:sv];
+
+//mas_makeConstraints就是Masonry的autolayout添加函数 将所需的约束添加到block中行了
+[sv mas_makeConstraints:^(MASConstraintMaker *make) {
+
+    //将sv居中(很容易理解吧?)
+    make.center.equalTo(self.view);
+
+    //将size设置成(300,300)
+    make.size.mas_equalTo(CGSizeMake(300, 300));
+}];
+</code></pre>
+
+<p>这里有两个问题要分解一下</p>
+
+<ul>
+<li><p>首先在Masonry中能够添加autolayout约束有三个函数</p>
+
+<pre><code>  - (NSArray *)mas_makeConstraints:(void(^)(MASConstraintMaker *make))block;
+  - (NSArray *)mas_updateConstraints:(void(^)(MASConstraintMaker *make))block;
+  - (NSArray *)mas_remakeConstraints:(void(^)(MASConstraintMaker *make))block;
+
+      /*
+          mas_makeConstraints 只负责新增约束 Autolayout不能同时存在两条针对于同一对象的约束 否则会报错 
+          mas_updateConstraints 针对上面的情况 会更新在block中出现的约束 不会导致出现两个相同约束的情况
+          mas_remakeConstraints 则会清除之前的所有约束 仅保留最新的约束
+
+          三种函数善加利用 就可以应对各种情况了
+      */
+</code></pre></li>
+<li><p>其次 equalTo 和 mas_equalTo的区别在哪里呢? 其实 mas_equalTo是一个MACRO</p>
+
+<pre><code>  #define mas_equalTo(...)                 equalTo(MASBoxValue((__VA_ARGS__)))
+  #define mas_greaterThanOrEqualTo(...)    greaterThanOrEqualTo(MASBoxValue((__VA_ARGS__)))
+  #define mas_lessThanOrEqualTo(...)       lessThanOrEqualTo(MASBoxValue((__VA_ARGS__)))
+
+  #define mas_offset(...)                  valueOffset(MASBoxValue((__VA_ARGS__)))
+</code></pre></li>
+</ul>
+
+
+<p>可以看到 mas_equalTo只是对其参数进行了一个BOX操作(装箱) MASBoxValue的定义具体可以看看源代码 太长就不贴出来了</p>
+
+<p>所支持的类型 除了NSNumber支持的那些数值类型之外 就只支持<code>CGPoint</code> <code>CGSize</code> <code>UIEdgeInsets</code></p>
+
+<p>介绍完这几个问题 我们就继续往下了 PS:刚才定义的sv会成为我们接下来所有sample的superView</p>
+
+<h3>[初级] 让一个view略小于其superView(边距为10)</h3>
+
+<pre><code>UIView *sv1 = [UIView new];
+[sv1 showPlaceHolder];
+sv1.backgroundColor = [UIColor redColor];
+[sv addSubview:sv1];
+[sv1 mas_makeConstraints:^(MASConstraintMaker *make) {
+     make.edges.equalTo(sv).with.insets(UIEdgeInsetsMake(10, 10, 10, 10));
+
+    /* 等价于
+    make.top.equalTo(sv).with.offset(10);
+    make.left.equalTo(sv).with.offset(10);
+    make.bottom.equalTo(sv).with.offset(-10);
+    make.right.equalTo(sv).with.offset(-10);
+    */
+
+    /* 也等价于
+    make.top.left.bottom.and.right.equalTo(sv).with.insets(UIEdgeInsetsMake(10, 10, 10, 10));
+    */
+}];
+</code></pre>
+
+<p>代码效果
+<img src="http://i12.tietuku.com/e51b46fcd1cbee6e.png" alt="代码效果" /></p>
+
+<p>可以看到 edges 其实就是top,left,bottom,right的一个简化 分开写也可以 一句话更省事</p>
+
+<p>那么为什么bottom和right里的offset是负数呢? 因为这里计算的是绝对的数值 计算的bottom需要小于sv的底部高度 所以要-10 同理用于right</p>
+
+<p>这里有意思的地方是<code>and</code>和<code>with</code> 其实这两个函数什么事情都没做</p>
+
+<pre><code>- (MASConstraint *)with {
+return self;
+}
+
+- (MASConstraint *)and {
+    return self;
+}
+</code></pre>
+
+<p>但是用在这种链式语法中 就非常的巧妙和易懂 不得不佩服作者的心思(虽然我现在基本都会省略)</p>
+
+<h3>[初级] 让两个高度为150的view垂直居中且等宽且等间隔排列 间隔为10(自动计算其宽度)</h3>
+
+<pre><code>int padding1 = 10;
+
+[sv2 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.mas_equalTo(sv.mas_centerY);
+    make.left.equalTo(sv.mas_left).with.offset(padding1);
+    make.right.equalTo(sv3.mas_left).with.offset(-padding1);
+    make.height.mas_equalTo(@150);
+    make.width.equalTo(sv3);
+}];
+
+[sv3 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.mas_equalTo(sv.mas_centerY);
+    make.left.equalTo(sv2.mas_right).with.offset(padding1);
+    make.right.equalTo(sv.mas_right).with.offset(-padding1);
+    make.height.mas_equalTo(@150);
+    make.width.equalTo(sv2);
+}];
+</code></pre>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/6b46f1ade2a7f0ba.png" alt="代码效果" /></p>
+
+<p>这里我们在两个子view之间互相设置的约束 可以看到他们的宽度在约束下自动的被计算出来了</p>
+
+<h3>[中级] 在UIScrollView顺序排列一些view并自动计算contentSize</h3>
+
+<pre><code>UIScrollView *scrollView = [UIScrollView new];
+scrollView.backgroundColor = [UIColor whiteColor];
+[sv addSubview:scrollView];
+[scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.edges.equalTo(sv).with.insets(UIEdgeInsetsMake(5,5,5,5));
+}];
+
+UIView *container = [UIView new];
+[scrollView addSubview:container];
+[container mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.edges.equalTo(scrollView);
+    make.width.equalTo(scrollView);
+}];
+
+int count = 10;
+
+UIView *lastView = nil;
+
+for ( int i = 1 ; i &lt;= count ; ++i )
+{
+    UIView *subv = [UIView new];
+    [container addSubview:subv];
+    subv.backgroundColor = [UIColor colorWithHue:( arc4random() % 256 / 256.0 )
+                                    saturation:( arc4random() % 128 / 256.0 ) + 0.5
+                                    brightness:( arc4random() % 128 / 256.0 ) + 0.5
+                                       alpha:1];
+
+    []subv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.and.right.equalTo(container);
+        make.height.mas_equalTo(@(20*i));
+
+        if ( lastView )
+        {
+            make.top.mas_equalTo(lastView.mas_bottom);
+        }
+        else
+        {
+            make.top.mas_equalTo(container.mas_top);
+        }
+    }];
+
+    lastView = subv;
+}
+
+
+[container mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.bottom.equalTo(lastView.mas_bottom);
+}];
+</code></pre>
+
+<p>头部效果
+<img src="http://i12.tietuku.com/0ead55378b7a7111.png" alt="头部效果" /></p>
+
+<p>尾部效果
+<img src="http://i12.tietuku.com/a27aa334358fddef.png" alt="尾部效果" /></p>
+
+<p>从scrollView的scrollIndicator可以看出 scrollView的内部已如我们所想排列好了</p>
+
+<p>这里的关键就在于container这个view起到了一个中间层的作用 能够自动的计算uiscrollView的contentSize</p>
+
+<h3>[高级] 横向或者纵向等间隙的排列一组view</h3>
+
+<p>很遗憾 autoLayout并没有直接提供等间隙排列的方法(Masonry的官方demo中也没有对应的案例) 但是参考案例3 我们可以通过一个小技巧来实现这个目的 为此我写了一个Category</p>
+
+<pre><code>@implementation UIView(Masonry_LJC)
+
+- (void) distributeSpacingHorizontallyWith:(NSArray*)views
+{
+    NSMutableArray *spaces = [NSMutableArray arrayWithCapacity:views.count+1];
+
+    for ( int i = 0 ; i &lt; views.count+1 ; ++i )
+    {
+        UIView *v = [UIView new];
+        [spaces addObject:v];
+        [self addSubview:v];
+
+        [v mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(v.mas_height);
+        }];
+    }    
+
+    UIView *v0 = spaces[0];
+
+    [v0 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.mas_left);
+        make.centerY.equalTo(((UIView*)views[0]).mas_centerY);
+    }];
+
+    UIView *lastSpace = v0;
+    for ( int i = 0 ; i &lt; views.count; ++i )
+    {
+        UIView *obj = views[i];
+        UIView *space = spaces[i+1];
+
+        [obj mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(lastSpace.mas_right);
+        }];
+
+        [space mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(obj.mas_right);
+            make.centerY.equalTo(obj.mas_centerY);
+            make.width.equalTo(v0);
+        }];
+
+        lastSpace = space;
+    }
+
+    [lastSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self.mas_right);
+    }];
+
+}
+
+- (void) distributeSpacingVerticallyWith:(NSArray*)views
+{
+    NSMutableArray *spaces = [NSMutableArray arrayWithCapacity:views.count+1];
+
+    for ( int i = 0 ; i &lt; views.count+1 ; ++i )
+    {
+        UIView *v = [UIView new];
+        [spaces addObject:v];
+        [self addSubview:v];
+
+        [v mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(v.mas_height);
+        }];
+    }
+
+
+    UIView *v0 = spaces[0];
+
+    [v0 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.mas_top);
+        make.centerX.equalTo(((UIView*)views[0]).mas_centerX);
+    }];
+
+    UIView *lastSpace = v0;
+    for ( int i = 0 ; i &lt; views.count; ++i )
+    {
+        UIView *obj = views[i];
+        UIView *space = spaces[i+1];
+
+        [obj mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(lastSpace.mas_bottom);
+        }];
+
+        [space mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(obj.mas_bottom);
+            make.centerX.equalTo(obj.mas_centerX);
+            make.height.equalTo(v0);
+        }];
+
+        lastSpace = space;
+    }
+
+    [lastSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.mas_bottom);
+    }];
+
+}
+
+@end
+</code></pre>
+
+<p>简单的来测试一下</p>
+
+<pre><code>UIView *sv11 = [UIView new];
+UIView *sv12 = [UIView new];
+UIView *sv13 = [UIView new];
+UIView *sv21 = [UIView new];
+UIView *sv31 = [UIView new];
+
+sv11.backgroundColor = [UIColor redColor];
+sv12.backgroundColor = [UIColor redColor];
+sv13.backgroundColor = [UIColor redColor];
+sv21.backgroundColor = [UIColor redColor];
+sv31.backgroundColor = [UIColor redColor];
+
+[sv addSubview:sv11];
+[sv addSubview:sv12];
+[sv addSubview:sv13];
+[sv addSubview:sv21];
+[sv addSubview:sv31];
+
+//给予不同的大小 测试效果
+
+[sv11 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.equalTo(@[sv12,sv13]);
+    make.centerX.equalTo(@[sv21,sv31]);
+    make.size.mas_equalTo(CGSizeMake(40, 40));
+}];
+
+[sv12 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(70, 20));
+}];
+
+[sv13 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(50, 50));
+}];
+
+[sv21 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(50, 20));
+}];
+
+[sv31 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(40, 60));
+}];
+
+[sv distributeSpacingHorizontallyWith:@[sv11,sv12,sv13]];
+[sv distributeSpacingVerticallyWith:@[sv11,sv21,sv31]];
+
+[sv showPlaceHolderWithAllSubviews];
+[sv hidePlaceHolder];
+</code></pre>
+
+<p>代码效果
+<img src="http://i12.tietuku.com/5ef072f7c4e6f689.png" alt="代码效果" /></p>
+
+<p>perfect! 简洁明了的达到了我们所要的效果</p>
+
+<p>这里所用的技巧就是 使用空白的占位view来填充我们目标view的旁边 这点通过图上的空白标注可以看出来</p>
+
+<h2>小结</h2>
+
+<p>通过以上5个案例 我觉得已经把Masonry的常用功能介绍得差不多了 如果你觉得意犹未尽呢 请下载官方的demo来学习</p>
+
+<p>总而言之 Masonry是一个非常优秀的autolayout库 能够节省大量的开发和学习时间 尤其适合我这种纯代码的iOSer 在iPhone6发布后引发的适配潮中 Masonry一定可以助你一臂之力 :)</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[如何上传本地文件到github]]></title>
     <link href="http://zyj179638121.github.io/blog/2015/04/11/%E5%A6%82%E4%BD%95%E4%B8%8A%E4%BC%A0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%88%B0github/"/>
     <updated>2015-04-11T13:00:04+08:00</updated>
@@ -735,6 +2623,248 @@ git push -u origin master
 
 <pre><code>git remote add origin git@github.com:IsaJenko/learngit.git
 git push -u origin master
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[KVO]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/03/07/KVO/"/>
+    <updated>2015-03-07T15:53:28+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/03/07/KVO</id>
+    <content type="html"><![CDATA[<h3>一、概述</h3>
+
+<p>KVO,即：Key-Value Observing，它提供一种机制，当指定的对象的属性被修改后，则对象就会接受到通知。简单的说就是每次指定的被观察的对象的属性被修改后，KVO就会自动通知相应的观察者了。
+KVO其实也是“观察者”设计模式的一种应用。我的看法是，这种模式有利于两个类间的解耦合，尤其是对于 业务逻辑 M与视图控制 C 这两个功能的解耦合。</p>
+
+<!--more-->
+
+
+<p>KVO使⽤用步骤:
+- 1、注册观察者(为被观察者指定观察者以及被观察属性)
+- 2、实现回调⽅方法
+- 3、触发回调⽅方法(被观察属性发⽣生更改)
+- 4、移除观察者</p>
+
+<p>KVO使⽤用场景:MVC中M与C通信,M发⽣生变化通知C。其中M是被
+观察者,C是观察者。</p>
+
+<p>KVO注意事项:观察者销毁之前,移除观察者,否则会出现程序异 常(给已经销毁的对象发送消息)
+实例：
+有一个业务类：Walker，在这个类内部只负责关于业务逻辑的处理，比如负责从服务器传来的JSON中解析数据，或做其他业务数据上的处理。
+有另一个类：ViewController，专门负责界面的交互与试图更新。其中，需要将Walker的某些属性显示出来，并实时更新。</p>
+
+<p>目前，据我所能想到的方法有以下几种：</p>
+
+<h4>方法1、直接的函数调用</h4>
+
+<p>在Walker的类内部，把创建一个ViewController的对象，然后调用ViewController的修改界面的方法，把需要改动的属性值作为形参传给该函数。（加载数据之后动态刷新）</p>
+
+<p>这种方式最直观，因为它不需要绕任何弯子。但是，确实最糟的方法。因为Walker与ViewController这两个类从此紧紧耦合在一起了。记住这句话，处理业务逻辑的类，对外部的事情知道得越少越好。甚至于，要做到外部是否有VC(View Controller)，有多少个VC都不影响我。假设这是一个项目，程序员A负责业务逻辑的处理，程序员B负责UI，则采取这种方式后，程序员A就受制于B，互相干扰。</p>
+
+<h4>方法2、利用消息通信机制（NSNotification）</h4>
+
+<p>在Walker内部建立消息中心NSNotificationCenter，把实例化之后的VC对象作为observer。Center建在Walker或者VC都无所谓，这种方法比前面的方法好一些。但是有一个很大的缺点：如果Walker需要更改的属性很多而且很频繁，那么这种方式很不方便传值。而且，注意到了没，“把实例化后的VC对象作为observer”，始终逃不开在Walker内部对VC实例化。依旧是耦合着。</p>
+
+<h4>方法3、利用delegate</h4>
+
+<p>关于delegate的介绍有很多，这里就不多讲。但是在这种需求下用 delegate，有点“杀鸡用牛刀”感觉，成本较大，而且不直观。</p>
+
+<h4>方法4、利用KVO模式</h4>
+
+<p>所有的代码都将在ViewController中实现。对于Walker，它自己都不知道外部是否有VC，以及VC会怎用用我的属性。</p>
+
+<p>代码
+Person 类属性name。
+Controller功能：
+nameLabel.text = person.name;
+点击页面实例变量person的 name 属性值发生改变。
+随之实现nameLabel.text 的改变。</p>
+
+<pre><code> #import "ViewController.h"
+ #import "Person.h"
+
+@interface ViewController ()
+@property (nonatomic, strong) Person * person;
+@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+[super viewDidLoad];
+   //初始化person 实例变量
+self.person = [[Person alloc] init];
+self.person.name = @"宋静静";
+// nameLabel.text 的值为self.person.name ，此时为宋静静。不使用观察者模式，当name 的值发生改变时，nameLabel.text显示并没有改变。
+_nameLabel.text = self.person.name;
+
+//  添加观察者，为person 实例变量添加观察者，键值是 name 属性。也就是监测的是person的name属性。 NSKeyValueObservingOptionNew 新值
+[self.person addObserver:self forKeyPath:@"name" options:NSKeyValueObservingOptionNew context:@"描述"];
+}
+//点击按钮 为实现名字改变，name 被监听后，一旦name 的值改变，触发下面方法。改变label 的值
+//通知是一种观察者模式
+
+ #pragma mark 触发观察者 被观察者对象的属性一旦发生变化，立即触发此方法。
+-(void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+//    keyPath 对象被观察的属性。
+//    object ：被观察对象
+//    change：被观察对象的属性变化. change 是一个字典。key 值为new 时，键值就是更新后的数据
+//   context： 描述，可以用来传值，使用强制转换获取值。
+NSLog(@"%@",keyPath);
+NSLog(@"%@",object);
+NSLog(@"%@",change);
+NSLog(@"%@",context);
+//    多个观察者存在时， 可以根据被观察对象的类别以及被观察属性做出不同操作。
+if ([object isKindOfClass:[Person class]]&amp;&amp;[keyPath isEqualToString:@"name"]) {
+//设置监听到 改变后需要执行的操作，这里是设置 _nameLabel.text。也可以设置背景变色（name 值修改背景变色）等等
+//        两种方式等价
+//1.  _nameLabel.text = change [@"new"];
+// 2.  _nameLabel.text = change[NSKeyValueChangeNewKey];
+//      第二种内部实现： NSString *const NSKeyValueChangeNewKey = @"new"; _nameLabel.text = change[NSKeyValueChangeNewKey];
+}
+//    移除观察者 例如音乐缓存结束后，移除观察者
+[self.person removeObserver:self forKeyPath:@"name"]; 
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+self.person.name = @"邹静";
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[CocoaPods使用]]></title>
+    <link href="http://zyj179638121.github.io/blog/2015/01/20/cocopods%E4%BD%BF%E7%94%A8/"/>
+    <updated>2015-01-20T19:32:44+08:00</updated>
+    <id>http://zyj179638121.github.io/blog/2015/01/20/cocopods使用</id>
+    <content type="html"><![CDATA[<p>cocopods的安装与使用</p>
+
+<p> <!--more--></p>
+
+<h3>更新导入库用此条命令! 解决卡死问题</h3>
+
+<h3>pod install &ndash;no-repo-update</h3>
+
+<h3>CocoaPods是什么</h3>
+
+<p>当我们开发iOS项目时候，会经常使用到第三方类库，并且会使用很多。
+大家的做法基本上都是到GitHub上下载一个一个的类库，然后导入到工程中，并且引入各种的类库，做各种的配置。有时候还要处理ARC与MRC的问题，很麻烦。
+还有一种情况，就是当第三方类库出现升级的情况时候，我们还需要删掉旧的，下载新的，再重新导入。</p>
+
+<p>CocoaPods就是类库管理工具，刚刚提到所有麻烦的操作，CocoaPods都能解决!</p>
+
+<p> <!--more--></p>
+
+<h3>安装CocoaPods</h3>
+
+<p>安装CocoaPods需要本地Ruby环境，默认情况下，Mac自带Ruby环境，可以通过在终端输入命令ruby -v查看Ruby版本，接下来进行安装，使用如下命令：</p>
+
+<pre><code> $ sudo gem install CocoaPods
+ 输入以上命令，可能会一直没有反应，或者出现ERROR。注意了，我们在天朝，是有一堵墙的，挡住了，所以你安装失败。不过没关系，我们可以使用另外一个地址来访问CocoaPods。
+</code></pre>
+
+<p>既然官网地址被墙了，我们就使用淘宝的，淘宝的Ruby镜像可以帮助我们访问CocoaPods，分别在终端输入如下命令，将Ruby镜像替换为淘宝的镜像地址:</p>
+
+<pre><code>$ gem sources —remove https://rubygems.org/
+$ gem sources -a http://ruby.taobao.org/
+</code></pre>
+
+<p>完成之后，我们可以使用如下命令来查看Ruby镜像是否已经指向了淘宝：</p>
+
+<p>$ gem sources -l
+如果看到如下信息，表示已经成功！！！
+<img src="http://i5.tietuku.com/935159867a2c3f82.jpg" alt="" /></p>
+
+<p>下面，重新执行安装命令，等待安装结束就可以了</p>
+
+<pre><code>$ sudo gem install CocoaPods
+</code></pre>
+
+<p>等待执行完毕，看到如下提示，恭喜你，安装完成。
+<img src="http://ww2.sinaimg.cn/large/74311666jw1eygxopggdtj20gw02mjrt.jpg" alt="" /></p>
+
+<p>如果遇到其它的安装问题，请自行Google解决吧。</p>
+
+<h3>使用CocoaPods</h3>
+
+<p>安装已经完成了，下面就来教大家如何使用。
+做一个项目，项目中需要使用SDWebImage，看看如何使用CocoaPods进行安装
+首先使用如下命令，查看CocoaPods是否支持SDWebImage类库</p>
+
+<pre><code>$ pod search SDWebImage
+</code></pre>
+
+<p>可以看到下面这些搜索结果，表示SDWebImage是可以的，
+ <img src="http://i12.tietuku.com/5847b5e6afb84ba5.jpg" alt="" /></p>
+
+<p>注意圈住的那一行，一会需要使用。这行信息是告诉CocoaPods去下载哪一个第三方类库和它的哪一个版本，是一条配置信息。</p>
+
+<h4>下面创建空的项目，然后使用CocoaPods往项目中导入SDWebImage类库：</h4>
+
+<p>1>. 创建项目 CocoaPods_Test，保存到桌面</p>
+
+<p>2>. 在终端输入 cd空格，拖入项目文件夹，回车，进入项目所在的根目录</p>
+
+<p>3>.通过命令行创建Podfile文件，该文件的作用是配置第三方类库的信息，就是告诉CocoaPods去管理哪些类库</p>
+
+<pre><code>$ vim Podfile
+</code></pre>
+
+<p>vim打开文件后，按i进入编辑模式，输入如下文字：
+  <img src="http://i12.tietuku.com/5266e8d6fc217c17.jpg" alt="" />
+里面的<code>pod 'SDWebImage', '~&gt; 3.7.1'</code>就是我们在上面圈住的那一行。
+输入完成后按ESC退出编辑模式，接着输入:wq，并按回车键进行保存并退出。
+上面的操作完成之后，我们可以在项目根目录发现一个没有后缀的Podfile文件，这就是刚刚创建的文件，里面保存了需要使用的第三方类库的信息。(注意：Podfile文件必须和.xcodeproj文件在同一目录下)</p>
+
+<p>4>. 接下来，我们就可以使用命令来安装第三方类库了，(确保终端路径在项目根目录)运行如下命令：</p>
+
+<pre><code>$ pod install
+</code></pre>
+
+<p>当我们看到这样的提示，就表示你操作成功：
+<img src="http://i12.tietuku.com/5266e8d6fc217c17.jpg" alt="" />
+第三方类库导入成功</p>
+
+<h4>注意最后一句话：”Please close any current Xcode sessions and use ‘CocoaPods_Test.xcworkspace’for this project from now on”。这就是告诉我们，从现在开始需要使用这个文件来打开项目，而不在是之前的.xcodeproj</h4>
+
+<p>5>. 双击项目中的CocoaPods_Test.xcworkspace文件来打开项目，你会看到如下目录结构：</p>
+
+<p> <a href="http://m.yea.im/4ev.html" title="87276160ad89fb15" ><img src="http://m1.yea.im/4ev_m.jpg" alt="87276160ad89fb15" /></a></p>
+
+<p>我们会发现多了一个Pods的依赖工程，打开Pods文件夹后，发现SDWebImage已经在这里面了。</p>
+
+<p>6>. 现在，我们就可以在想要使用SDWebImage的文件中，引入需要的文件，然后就可以正常使用了。</p>
+
+<p>7>. 到现在为止，你已经学会了如何使用CocoaPods来添加第三方类库。如果我们需要使用多个第三方类库，只需要修改Podfile文件就可以了，如下：
+添加多个第三方类库
+<img src="http://i12.tietuku.com/52b00c779be4764e.jpg" alt="" />
+NOTE:
+怎么样，过程很简单吧。只需要: 1.查询 2.修改Podfile文件 3.安装 即可完成!</p>
+
+<h4>其它</h4>
+
+<p>当我们想要重新安装CocoaPods的时候，需要卸载这个东西，很简单，只需要执行以下命令即可：</p>
+
+<pre><code>$ sudo gem uninstall CocoaPods
+</code></pre>
+
+<p>如果安装了多个版本，选择All，即可全部卸载！</p>
+
+<p>第三方版本号的各种写法与含义：</p>
+
+<pre><code>pod 'AFNetworking'      //不显式指定依赖库版本，表示每次都获取最新版本
+pod 'AFNetworking',  '2.0'     //只使用2.0版本
+pod 'AFNetworking', '&gt;2.0'     //使用高于2.0的版本
+pod 'AFNetworking', '&gt;=2.0'     //使用大于或等于2.0的版本
+pod 'AFNetworking', '&lt;2.0'     //使用小于2.0的版本
+pod 'AFNetworking', '&lt;=2.0'     //使用小于或等于2.0的版本
+pod 'AFNetworking', '~&gt;0.1.2'     //使用大于等于0.1.2但小于0.2的版本，相当于&gt;=0.1.2并且&lt;0.2.0
+pod 'AFNetworking', '~&gt;0.1'     //使用大于等于0.1但小于1.0的版本
+pod 'AFNetworking', '~&gt;0'     //高于0的版本，写这个限制和什么都不写是一个效果，都表示使用最新版本
 </code></pre>
 ]]></content>
   </entry>

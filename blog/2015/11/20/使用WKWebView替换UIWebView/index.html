@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>使用WKWebView替换UIWebView - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="WKWebView替换UIWebView 开发App的过程中，常常会遇到在App内部加载网页，通常用UIWebView加载。这个自iOS2开始使用的网页加载器一直是开发的心病：加载速度慢，占用内存多，优化困难。如果加载网页多，还可能因为过量占用内存而给系统kill掉。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">使用WKWebView替换UIWebView</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-11-20T17:11:31+08:00'><span class='date'>2015 年11 月20 日</span> <span class='time'>5:11 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>WKWebView替换UIWebView</h2>
+
+<p> 开发App的过程中，常常会遇到在App内部加载网页，通常用UIWebView加载。这个自iOS2开始使用的网页加载器一直是开发的心病：加载速度慢，占用内存多，优化困难。如果加载网页多，还可能因为过量占用内存而给系统kill掉。各种优化的方法效果也不那么明显iOS8以后，苹果推出了新框架Wekkit，提供了替换UIWebView的组件WKWebView。各种UIWebView的问题没有了，速度更快了，占用内存少了，一句话，WKWebView是App内部加载网页的最佳选择！</p>
+
+<!--more-->
+
+
+<p>先看下 WKWebView的特性：</p>
+
+<ul>
+<li>1.在性能、稳定性、功能方面有很大提升（最直观的体现就是加载网页是占用的内存，模拟器加载百度与开源中国网站时，WKWebView占用23M，而UIWebView占用85M）；</li>
+<li>2.允许JavaScript的Nitro库加载并使用（UIWebView中限制）；</li>
+<li>3.支持了更多的HTML5特性；</li>
+<li>4.高达60fps的滚动刷新率以及内置手势；</li>
+<li><p>5.将UIWebViewDelegate与UIWebView重构成了14类与3个协议（查看苹果官方文档）；
+然后从以下几个方面说下WKWebView的基本用法：</p></li>
+<li><p>1 加载网页</p></li>
+<li>2 加载的状态回调</li>
+<li>3 新的WKUIDelegate协议</li>
+<li>4 动态加载并运行JS代码</li>
+<li>5 webView 执行JS代码</li>
+<li>6 JS调用App注册过的方法
+
+<h3>一、加载网页</h3>
+
+<p>加载网页或HTML代码的方式与UIWebView相同，代码示例如下：</p>
+
+<pre><code>  WKWebView *webView = [[WKWebView alloc] initWithFrame:self.view.bounds];
+  [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.baidu.com"]]];
+  [self.view addSubview:webView];
+</code></pre>
+
+<h3>二、加载的状态回调 （WKNavigationDelegate）</h3>
+
+<p>用来追踪加载过程（页面开始加载、加载完成、加载失败）的方法：</p>
+
+<pre><code>  // 页面开始加载时调用
+  - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation;
+  // 当内容开始返回时调用
+  - (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation;
+  // 页面加载完成之后调用
+  - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation;
+  // 页面加载失败时调用
+  - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation;
+</code></pre>
+
+<p>页面跳转的代理方法：</p>
+
+<pre><code>  // 接收到服务器跳转请求之后调用
+  - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation;
+  // 在收到响应后，决定是否跳转
+  - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler;
+  // 在发送请求之前，决定是否跳转
+  - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler;
+</code></pre>
+
+<h3>三、新的WKUIDelegate协议</h3>
+
+<p>  这个协议主要用于WKWebView处理web界面的三种提示框(警告框、确认框、输入框)，下面是警告框的例子:</p>
+
+<pre><code>  /**
+   *  web界面中有弹出警告框时调用
+   *
+   *  @param webView           实现该代理的webview
+   *  @param message           警告框中的内容
+   *  @param frame             主窗口
+   *  @param completionHandler 警告框消失调用
+   */
+  - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(void (^)())completionHandler;
+</code></pre>
+
+<h3>四、动态加载并运行JS代码</h3>
+
+<p>用于在客户端内部加入<code>JS</code>代码，并执行，示例如下：</p>
+
+<pre><code>  // 图片缩放的js代码
+  NSString *js = @"var count = document.images.length;for (var i = 0; i &lt; count; i++) {var image = document.images[i];image.style.width=320;};window.alert('找到' + count + '张图');";
+  // 根据JS字符串初始化WKUserScript对象
+  WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+  // 根据生成的WKUserScript对象，初始化WKWebViewConfiguration
+  WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+  [config.userContentController addUserScript:script];
+  _webView = [[WKWebView alloc] initWithFrame:self.view.bounds configuration:config];
+  [_webView loadHTMLString:@"&lt;head&gt;&lt;/head&gt;&lt;imgea src='http://www.nsu.edu.cn/v/2014v3/img/background/3.jpg' /&gt;"baseURL:nil];
+  [self.view addSubview:_webView];
+</code></pre>
+
+<h3>五、webView 执行JS代码</h3>
+
+<p>用户调用用JS写过的代码，一般指服务端开发的：</p>
+
+<pre><code>  //javaScriptString是JS方法名，completionHandler是异步回调block
+  [self.webView evaluateJavaScript:javaScriptString completionHandler:completionHandler];
+</code></pre>
+
+<h3>六、JS调用App注册过的方法</h3>
+
+<p>再WKWebView里面注册供JS调用的方法，是通过    <code>WKUserContentController</code>类下面的方法：</p>
+
+<pre><code>  - (void)addScriptMessageHandler:(id     &lt;WKScriptMessageHandler&gt;)scriptMessageHandler name:(NSString *)name;
+</code></pre>
+
+<p><code>scriptMessageHandler</code>是代理回调，JS调用name方法后，OC会调用<code>scriptMessageHandler</code>指定的对象。</p></li>
+</ul>
+
+
+<p><code>JS</code>在调用OC注册方法的时候要用下面的方式：</p>
+
+<pre><code>window.webkit.messageHandlers.&lt;name&gt;.postMessage(&lt;messageBody&gt;)
+</code></pre>
+
+<p>注意，name(方法名)是放在中间的，messageBody只能是一个对象，如果要传多个值，需要封装成数组，或者字典。整个示例如下：</p>
+
+<pre><code>    //OC注册供JS调用的方法
+    [[_webView configuration].userContentController addScriptMessageHandler:self name:@"closeMe"];
+
+    //OC在JS调用方法做的处理
+    - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+    {
+NSLog(@"JS 调用了 %@ 方法，传回参数 %@",message.name,message.body);
+</code></pre>
+
+<p>}</p>
+
+<pre><code>//JS调用
+window.webkit.messageHandlers.closeMe.postMessage(null);
+</code></pre>
+
+<p>如果你在self的dealloc打个断点，会发现self没有释放！这显然是不行的！谷歌后看到一种解决方法，如下：</p>
+
+<pre><code>@interface WeakScriptMessageDelegate : NSObject&lt;WKScriptMessageHandler&gt;
+
+@property (nonatomic, weak) id&lt;WKScriptMessageHandler&gt; scriptDelegate;
+
+- (instancetype)initWithDelegate:(id&lt;WKScriptMessageHandler&gt;)scriptDelegate;
+
+@end
+
+@implementation WeakScriptMessageDelegate
+
+- (instancetype)initWithDelegate:(id&lt;WKScriptMessageHandler&gt;)scriptDelegate
+{
+self = [super init];
+if (self) {
+    _scriptDelegate = scriptDelegate;
+}
+return self;
+}
+
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message
+{
+[self.scriptDelegate userContentController:userContentController didReceiveScriptMessage:message];
+}
+
+@end
+</code></pre>
+
+<p>思路是另外创建一个代理对象，然后通过代理对象回调指定的self，</p>
+
+<pre><code>WKUserContentController *userContentController = [[WKUserContentController alloc] init];    
+[userContentController addScriptMessageHandler:[[WeakScriptMessageDelegate alloc] initWithDelegate:self] name:@"closeMe"];
+</code></pre>
+
+<p>运行代码，self释放了，WeakScriptMessageDelegate却没有释放啊啊啊！
+还需在self的dealloc里面 添加这样一句代码：</p>
+
+<pre><code>[[_webView configuration].userContentController removeScriptMessageHandlerForName:@"closeMe"];
+</code></pre>
+
+<p>OK，圆满解决问题！</p>
+
+<p>目前，大多数App需要支持iOS7以上的版本，而WKWebView只在iOS8后才能用，所以需要一个兼容性方案，既iOS7下用UIWebView，iOS8后用WKWebView。这个库提供了这种兼容性方案：<a href="https://github.com/wangyangcc/IMYWebView">WKWebView</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-11-20T17:11:31+08:00'><span class='date'>2015 年11 月20 日</span> <span class='time'>5:11 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/10/3DTouch%E3%80%81ShortcutItem%E3%80%81Peek-And-Pop/" title="Previous Post: 3DTouch、ShortcutItem、Peek And Pop">&laquo; 3DTouch、ShortcutItem、Peek And Pop</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/12/16/Guard/" title="Next Post: Guard">Guard &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS 第一章</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

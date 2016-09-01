@@ -5,11 +5,14 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>iOS UITabbar消失的问题 - 小赵的blog</title>
+  <title>UIView的layoutSubviews和drawRect方法何时调用 - 小赵的blog</title>
   <meta name="author" content="小赵">
 
   
-  <meta name="description" content="前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom &hellip;">
+  <meta name="description" content="layoutSubviews在以下情况下会被调用： 1、init初始化不会触发layoutSubviews。
+2、addSubview会触发layoutSubviews。
+3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化。
+4、 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
@@ -68,7 +71,7 @@
   
   <header>
     
-      <h1 class="entry-title">iOS UITabbar消失的问题</h1>
+      <h1 class="entry-title">UIView的layoutSubviews和drawRect方法何时调用</h1>
     
     
       <p class="meta">
@@ -77,14 +80,47 @@
 
 
 
-<time class='entry-date' datetime='2016-08-03T15:37:27+08:00'><span class='date'>2016 年8 月3 日</span> <span class='time'>3:37 pm</span></time>
+<time class='entry-date' datetime='2016-01-28T10:47:09+08:00'><span class='date'>2016 年1 月28 日</span> <span class='time'>10:47 am</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>前两天碰到过uitabbar莫名消失的问题,代码里面没有对uitabbar的hidden做处理,折腾了半天,后来发现了问题的所在,是因为在storyboard里面控制tabbar隐藏的时候,本来应该在SB里面UINavigationController对应的属性上面勾上 Hide Bottom Bar on Push,结果我在ViewController对应的属性上勾上了此选项&hellip;</p>
+<div class="entry-content"><h4>layoutSubviews在以下情况下会被调用：</h4>
+
+<!--more-->
+
+
+<ul>
+<li>1、init初始化不会触发layoutSubviews。</li>
+<li>2、addSubview会触发layoutSubviews。</li>
+<li>3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化。</li>
+<li>4、滚动一个UIScrollView会触发layoutSubviews。</li>
+<li>5、旋转Screen会触发父UIView上的layoutSubviews事件。</li>
+<li>6、改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件。</li>
+<li>7、直接调用setLayoutSubviews。</li>
+</ul>
+
+
+<h4>drawRect在以下情况下会被调用：</h4>
+
+<ul>
+<li>1、如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。drawRect 掉用是在Controller->loadView, Controller->viewDidLoad 两方法之后掉用的.所以不用担心在 控制器中,这些View的drawRect就开始画了.这样可以在控制器中设置一些值给View(如果这些View draw的时候需要用到某些变量 值).</li>
+<li>2、该方法在调用sizeToFit后被调用，所以可以先调用sizeToFit计算出size。然后系统自动调用drawRect:方法。</li>
+<li>3、通过设置contentMode属性值为UIViewContentModeRedraw。那么将在每次设置或更改frame的时候自动调用drawRect:。</li>
+<li>4、直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect:，但是有个前提条件是rect不能为0。以上1,2推荐；而3,4不提倡</li>
+</ul>
+
+
+<h4>drawRect方法使用注意点：</h4>
+
+<ul>
+<li>1、 若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate 的ref并且不能用于画图。drawRect：方法不能手动显示调用，必须通过调用setNeedsDisplay 或 者 setNeedsDisplayInRect，让系统自动调该方法。</li>
+<li>2、若使用calayer绘图，只能在drawInContext: 中（类似鱼drawRect）绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法</li>
+<li>3、若要实时画图，不能使用gestureRecognizer，只能使用touchbegan等方法来掉用setNeedsDisplay实时刷新屏幕</li>
+</ul>
+
 </div>
 
 
@@ -100,7 +136,7 @@
 
 
 
-<time class='entry-date' datetime='2016-08-03T15:37:27+08:00'><span class='date'>2016 年8 月3 日</span> <span class='time'>3:37 pm</span></time>
+<time class='entry-date' datetime='2016-01-28T10:47:09+08:00'><span class='date'>2016 年1 月28 日</span> <span class='time'>10:47 am</span></time>
       
 
 
@@ -108,7 +144,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/" >Tweet</a>
   
   
   
@@ -117,10 +153,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/" title="Previous Post: iOS 第一章">&laquo; iOS 第一章</a>
+        <a class="basic-alignment left" href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/" title="Previous Post: Swift单例">&laquo; Swift单例</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/" title="Next Post: iOS屏蔽emoji表情">iOS屏蔽emoji表情 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/" title="Next Post: iOS 第一章">iOS 第一章 &raquo;</a>
       
     </p>
   </footer>

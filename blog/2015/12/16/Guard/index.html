@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Guard - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="当你查看这篇文章时，肯定是看到了代码中使用了guard特性，这样，这篇文章能解决你的疑惑
+不过直接学习的也没关系，照样可以让你学会guard，开始吧。。。 guard特性是在Swift 2.0后推出的，所以请使用Xcode 7.X版本来编写代码 很多人都疑惑guard和if..else.. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2015/12/16/Guard/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Guard</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-12-16T16:08:17+08:00'><span class='date'>2015 年12 月16 日</span> <span class='time'>4:08 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>当你查看这篇文章时，肯定是看到了代码中使用了guard特性，这样，这篇文章能解决你的疑惑
+不过直接学习的也没关系，照样可以让你学会guard，开始吧。。。</p>
+
+<p>guard特性是在Swift 2.0后推出的，所以请使用Xcode 7.X版本来编写代码</p>
+
+<p>很多人都疑惑guard和if..else..到底有什么瓜葛，向下看，慢慢解释</p>
+
+<!--more-->
+
+
+<p>guard语句和if..else..语句有类似的地方，都是做判断处理
+与if语句相同的是，guard也是基于一个表达式的布尔值去判断一段代码是否该被执行
+与if语句不同的是，guard只有在条件不满足的时候才会执行这段代码
+guard语句有且仅有else语句，当条件不成立时，执行else部分；当条件成立时，执行guard后面的代码
+guard中声明的变量或者常量，在guard下面可以使用，但不能在else分支中使用</p>
+
+<h4>guard的使用</h4>
+
+<p>我们以今年高考为例，在进入考场时一般都会检查身份证和准考证，我们写这样一个方法：</p>
+
+<pre><code>func checkUp(person: [String: String!]) {
+// 检查身份证
+guard let id = person["id"] else {
+    print("没有携带身份证，禁止考试")
+    return
+}
+
+// 检查准考证
+guard let examNumber = person["examNumber"] else {
+    print("没有携带准考证，禁止考试")
+    return
+}
+
+// 身份证和准考证齐全，可以进入考试
+print("学号：\(id)  准考证号：\(examNumber) 可以进行考试...")
+</code></pre>
+
+<p>}</p>
+
+<pre><code>checkUp(["id": "xiaoze,maliya", "examNumber": "1302831992"])
+</code></pre>
+
+<p>详细看下面的解释(慢慢体会、慢慢体会、慢慢体会)，一共6句话，相信可以让你了然：</p>
+
+<p>guard很奇怪，只有一个else分支。
+guard没有条件成立的分支，确有条件不成立的分支。
+其实是这样的：
+当条件不成立的时候，会执行else分支，我们可以做一些执行转换语句，比如：return、break、continue或者throws
+当条件成立的时候，会直接过掉guard语句，执行下面的代码
+并且，我们在guard中声明的变量或者常量，在下面的区域内都可以使用。作用域看起来比较奇怪，但是非常实用
+这段代码，比我们写if..else..会好一些，语法简洁，判断了我们想要判断的情况，并且也不需要再次强制解包的代码。</p>
+
+<h4>guard和if..else..的比较</h4>
+
+<p>if..else的使用</p>
+
+<pre><code>func printInfo(age: Int?) {
+// 判断age不为空，并且判断是否大于等于0
+if age == nil || age &lt; 0 {
+    return
+}
+
+// 打印
+print(age!)
+}
+</code></pre>
+
+<p>在OC中，这是我们正常判断的一种写法，但是这种写法，存在一些小缺陷：</p>
+
+<p>我们在检查一个不符合我们期望的值！而非检查我们期望的值！如果我们添加了太多这样的判断，我们的代码就会变得不好理解
+如果前面都通过了，我们在使用参数的时候，还需要强制解包
+可选绑定</p>
+
+<pre><code>func printInfo2(age: Int?) {
+// 判断age不为空，并且大于0再打印
+if let age = age where age &gt; 0 {
+
+    // 如果条件满足，执行这里
+    print(age)
+}
+
+// 如果条件值不符合，就会执行这里的代码
+}
+</code></pre>
+
+<p>这种写法虽然解决了第一种写法的问题，但却引入了新问题
+把要写的代码放在了条件中，而不是之后，当条件很多的时候，代码可读性会非常的差</p>
+
+<h4>通过guard解决问题</h4>
+
+<pre><code>func printInfo3(age: Int?) {
+// 判断age不为空，并且大于0再打印
+guard let age = age where age &gt; 0 else {
+    // 如果条件不成立，则执行这里，直接返回
+    return
+}
+
+// 当条件符合的时候，执行这里，并且还不需要强制解包了
+print(age)
+}
+</code></pre>
+
+<h4>guard的好处</h4>
+
+<p>是对你所期望的条件做检查，而不是非期望值
+如果通过了条件判断，可选类型的变量在guard语句被调用的范围内会被自动的拆包，并且可选变量的作用域是函数内，非常方便
+对你所不期望的情况早做检查，使得你写的函数更易读，更易维护</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-12-16T16:08:17+08:00'><span class='date'>2015 年12 月16 日</span> <span class='time'>4:08 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2015/12/16/Guard/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2015/12/16/Guard/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/" title="Previous Post: 使用WKWebView替换UIWebView">&laquo; 使用WKWebView替换UIWebView</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/01/04/Swift-lazy-%E5%BB%B6%E8%BF%9F%E5%AD%98%E5%82%A8%E5%B1%9E%E6%80%A7/" title="Next Post: Swift_lazy()延迟存储属性">Swift_lazy()延迟存储属性 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS Git 使用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

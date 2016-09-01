@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Swift单例 - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="class ShareInstance {
+static let sharedInstance = ShareInstance()
+private init() {} //This prevents others from using the default '()' initializer &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Swift单例</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-01-22T17:14:21+08:00'><span class='date'>2016 年1 月22 日</span> <span class='time'>5:14 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><pre><code>class ShareInstance {
+static let sharedInstance = ShareInstance()
+private init() {} //This prevents others from using the default '()' initializer for this class.
+</code></pre>
+
+<p>}</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-01-22T17:14:21+08:00'><span class='date'>2016 年1 月22 日</span> <span class='time'>5:14 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/05/swift%E5%B0%8F%E7%BB%93/" title="Previous Post: Swift小结">&laquo; Swift小结</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/" title="Next Post: UIView的layoutSubviews和drawRect方法何时调用">UIView的layoutSubviews和drawRect方法何时调用 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS Git 使用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

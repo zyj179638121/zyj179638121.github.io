@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Masonry:快速上手autoLayout - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="前言 来源：里脊串的开发随笔（在此谢过分享者） 纯手写代码所经历的关于页面布局的三个时期 MagicNumber -&gt; autoresizingMask -&gt; autolayout 在iphone1-iphone3gs时代 window的size固定为(320,480) &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2015/05/11/Masonry-%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8BautoLayout/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Masonry:快速上手autoLayout</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-11T15:58:23+08:00'><span class='date'>2015 年5 月11 日</span> <span class='time'>3:58 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>前言</h2>
+
+<p>来源：里脊串的开发随笔（在此谢过分享者）</p>
+
+<p>纯手写代码所经历的关于页面布局的三个时期</p>
+
+<pre><code>MagicNumber -&gt; autoresizingMask -&gt; autolayout
+</code></pre>
+
+<!--more-->
+
+
+<ul>
+<li><p>在iphone1-iphone3gs时代 window的size固定为(320,480) 我们只需要简单计算一下相对位置就好了</p></li>
+<li><p>在iphone4-iphone4s时代 苹果推出了retina屏 但是给了码农们非常大的福利:window的size不变</p></li>
+<li><p>在iphone5-iphone5s时代 window的size变了(320,568) 这时autoresizingMask派上了用场(为啥这时候不用Autolayout? 因为还要支持ios5呗) 简单的适配一下即可</p></li>
+<li><p>在iphone6+时代 window的width也发生了变化(相对5和5s的屏幕比例没有变化) 终于是时候抛弃autoresizingMask改用autolayout了(不用支持ios5了 相对于屏幕适配的多样性来说autoresizingMask也已经过时了)</p></li>
+</ul>
+
+
+<p>那如何快速的上手autolayout呢? 说实话 当年ios6推出的同时新增了autolayout的特性 我看了一下官方文档和demo 就立马抛弃到一边了 因为实在过于的繁琐和啰嗦(有过经验的朋友肯定有同感)</p>
+
+<p>直到iphone6发布之后 我知道使用autolayout势在必行了 这时想起了以前在浏览Github看到过的一个第三方库Masonry 在花了几个小时的研究使用后 我就将autolayout掌握了(重点是我并没有学习任何的官方文档或者其他的关于autolayout的知识) 这就是我为什么要写下这篇文章来推荐它的原因</p>
+
+<h2>介绍</h2>
+
+<p>Masonry源码
+Masonry是一个轻量级的布局框架，拥有自己的描述语法，采用更优雅的链式语法封装自动布局，简洁明了并具有高可读性<code>而且同时支持iOS和Max OS X</code></p>
+
+<p>我们先来看一段官方的sample code来认识一下Masonry</p>
+
+<pre><code>[view1 mas_makeConstraints:^(MASConstraintMaker *make) {
+make.edges.equalTo(superview).with.insets(padding);
+}];
+</code></pre>
+
+<p>看到block里面的那句话: <code>make edges equalTo superview with insets</code>
+通过链式的自然语言 就把view1给autolayout好了 是不是简单易懂?</p>
+
+<h2>使用</h2>
+
+<p>看一下Masonry支持哪一些属性</p>
+
+<pre><code>@property (nonatomic, strong, readonly) MASConstraint *left;
+@property (nonatomic, strong, readonly) MASConstraint *top;
+@property (nonatomic, strong, readonly) MASConstraint *right;
+@property (nonatomic, strong, readonly) MASConstraint *bottom;
+@property (nonatomic, strong, readonly) MASConstraint *leading;
+@property (nonatomic, strong, readonly) MASConstraint *trailing;
+@property (nonatomic, strong, readonly) MASConstraint *width;
+property (nonatomic, strong, readonly) MASConstraint *height;
+@property (nonatomic, strong, readonly) MASConstraint *centerX;
+@property (nonatomic, strong, readonly) MASConstraint *centerY;
+@property (nonatomic, strong, readonly) MASConstraint *baseline;
+</code></pre>
+
+<p>这些属性与NSLayoutAttrubute的对照表如下</p>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/a3f1b5b3c8ecdfb3.png" alt="" /></p>
+
+<p>其中leading与left trailing与right 在正常情况下是等价的 但是当一些布局是从右至左时(比如阿拉伯文?没有类似的经验) 则会对调 换句话说就是基本可以不理不用 用left和right就好了</p>
+
+<p>在ios8发布后 又新增了一堆奇奇怪怪的属性(有兴趣的朋友可以去瞅瞅) Masonry暂时还不支持(不过你要支持ios6,ios7 就没必要去管那么多了)</p>
+
+<p>下面进入正题(为了方便 我们测试的superView都是一个size为(300,300)的UIView)</p>
+
+<p>下面 通过一些简单的实例来简单介绍如何轻松愉快的使用Masonry:</p>
+
+<h3>居中显示一个view</h3>
+
+<pre><code>- (void)viewDidLoad {
+
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+
+    UIView *sv = [UIView new];
+    [sv showPlaceHolder];
+    sv.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:sv];
+    [sv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.view);
+        make.size.mas_equalTo(CGSizeMake(300, 300));
+    }];
+
+}
+</code></pre>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/559d80622ffd45d0.png" alt="代码效果" /></p>
+
+<p>使用我之前写的MMPlaceHolder 可以看到superview已经按照我们预期居中并且设置成了适当的大小</p>
+
+<p>那么先看看这几行代码</p>
+
+<pre><code>//从此以后基本可以抛弃CGRectMake了
+UIView *sv = [UIView new];
+
+//在做autoLayout之前 一定要先将view添加到superview上 否则会报错
+[self.view addSubview:sv];
+
+//mas_makeConstraints就是Masonry的autolayout添加函数 将所需的约束添加到block中行了
+[sv mas_makeConstraints:^(MASConstraintMaker *make) {
+
+    //将sv居中(很容易理解吧?)
+    make.center.equalTo(self.view);
+
+    //将size设置成(300,300)
+    make.size.mas_equalTo(CGSizeMake(300, 300));
+}];
+</code></pre>
+
+<p>这里有两个问题要分解一下</p>
+
+<ul>
+<li><p>首先在Masonry中能够添加autolayout约束有三个函数</p>
+
+<pre><code>  - (NSArray *)mas_makeConstraints:(void(^)(MASConstraintMaker *make))block;
+  - (NSArray *)mas_updateConstraints:(void(^)(MASConstraintMaker *make))block;
+  - (NSArray *)mas_remakeConstraints:(void(^)(MASConstraintMaker *make))block;
+
+      /*
+          mas_makeConstraints 只负责新增约束 Autolayout不能同时存在两条针对于同一对象的约束 否则会报错 
+          mas_updateConstraints 针对上面的情况 会更新在block中出现的约束 不会导致出现两个相同约束的情况
+          mas_remakeConstraints 则会清除之前的所有约束 仅保留最新的约束
+
+          三种函数善加利用 就可以应对各种情况了
+      */
+</code></pre></li>
+<li><p>其次 equalTo 和 mas_equalTo的区别在哪里呢? 其实 mas_equalTo是一个MACRO</p>
+
+<pre><code>  #define mas_equalTo(...)                 equalTo(MASBoxValue((__VA_ARGS__)))
+  #define mas_greaterThanOrEqualTo(...)    greaterThanOrEqualTo(MASBoxValue((__VA_ARGS__)))
+  #define mas_lessThanOrEqualTo(...)       lessThanOrEqualTo(MASBoxValue((__VA_ARGS__)))
+
+  #define mas_offset(...)                  valueOffset(MASBoxValue((__VA_ARGS__)))
+</code></pre></li>
+</ul>
+
+
+<p>可以看到 mas_equalTo只是对其参数进行了一个BOX操作(装箱) MASBoxValue的定义具体可以看看源代码 太长就不贴出来了</p>
+
+<p>所支持的类型 除了NSNumber支持的那些数值类型之外 就只支持<code>CGPoint</code> <code>CGSize</code> <code>UIEdgeInsets</code></p>
+
+<p>介绍完这几个问题 我们就继续往下了 PS:刚才定义的sv会成为我们接下来所有sample的superView</p>
+
+<h3>[初级] 让一个view略小于其superView(边距为10)</h3>
+
+<pre><code>UIView *sv1 = [UIView new];
+[sv1 showPlaceHolder];
+sv1.backgroundColor = [UIColor redColor];
+[sv addSubview:sv1];
+[sv1 mas_makeConstraints:^(MASConstraintMaker *make) {
+     make.edges.equalTo(sv).with.insets(UIEdgeInsetsMake(10, 10, 10, 10));
+
+    /* 等价于
+    make.top.equalTo(sv).with.offset(10);
+    make.left.equalTo(sv).with.offset(10);
+    make.bottom.equalTo(sv).with.offset(-10);
+    make.right.equalTo(sv).with.offset(-10);
+    */
+
+    /* 也等价于
+    make.top.left.bottom.and.right.equalTo(sv).with.insets(UIEdgeInsetsMake(10, 10, 10, 10));
+    */
+}];
+</code></pre>
+
+<p>代码效果
+<img src="http://i12.tietuku.com/e51b46fcd1cbee6e.png" alt="代码效果" /></p>
+
+<p>可以看到 edges 其实就是top,left,bottom,right的一个简化 分开写也可以 一句话更省事</p>
+
+<p>那么为什么bottom和right里的offset是负数呢? 因为这里计算的是绝对的数值 计算的bottom需要小于sv的底部高度 所以要-10 同理用于right</p>
+
+<p>这里有意思的地方是<code>and</code>和<code>with</code> 其实这两个函数什么事情都没做</p>
+
+<pre><code>- (MASConstraint *)with {
+return self;
+}
+
+- (MASConstraint *)and {
+    return self;
+}
+</code></pre>
+
+<p>但是用在这种链式语法中 就非常的巧妙和易懂 不得不佩服作者的心思(虽然我现在基本都会省略)</p>
+
+<h3>[初级] 让两个高度为150的view垂直居中且等宽且等间隔排列 间隔为10(自动计算其宽度)</h3>
+
+<pre><code>int padding1 = 10;
+
+[sv2 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.mas_equalTo(sv.mas_centerY);
+    make.left.equalTo(sv.mas_left).with.offset(padding1);
+    make.right.equalTo(sv3.mas_left).with.offset(-padding1);
+    make.height.mas_equalTo(@150);
+    make.width.equalTo(sv3);
+}];
+
+[sv3 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.mas_equalTo(sv.mas_centerY);
+    make.left.equalTo(sv2.mas_right).with.offset(padding1);
+    make.right.equalTo(sv.mas_right).with.offset(-padding1);
+    make.height.mas_equalTo(@150);
+    make.width.equalTo(sv2);
+}];
+</code></pre>
+
+<p>代码效果
+<img src="http://i5.tietuku.com/6b46f1ade2a7f0ba.png" alt="代码效果" /></p>
+
+<p>这里我们在两个子view之间互相设置的约束 可以看到他们的宽度在约束下自动的被计算出来了</p>
+
+<h3>[中级] 在UIScrollView顺序排列一些view并自动计算contentSize</h3>
+
+<pre><code>UIScrollView *scrollView = [UIScrollView new];
+scrollView.backgroundColor = [UIColor whiteColor];
+[sv addSubview:scrollView];
+[scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.edges.equalTo(sv).with.insets(UIEdgeInsetsMake(5,5,5,5));
+}];
+
+UIView *container = [UIView new];
+[scrollView addSubview:container];
+[container mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.edges.equalTo(scrollView);
+    make.width.equalTo(scrollView);
+}];
+
+int count = 10;
+
+UIView *lastView = nil;
+
+for ( int i = 1 ; i &lt;= count ; ++i )
+{
+    UIView *subv = [UIView new];
+    [container addSubview:subv];
+    subv.backgroundColor = [UIColor colorWithHue:( arc4random() % 256 / 256.0 )
+                                    saturation:( arc4random() % 128 / 256.0 ) + 0.5
+                                    brightness:( arc4random() % 128 / 256.0 ) + 0.5
+                                       alpha:1];
+
+    []subv mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.and.right.equalTo(container);
+        make.height.mas_equalTo(@(20*i));
+
+        if ( lastView )
+        {
+            make.top.mas_equalTo(lastView.mas_bottom);
+        }
+        else
+        {
+            make.top.mas_equalTo(container.mas_top);
+        }
+    }];
+
+    lastView = subv;
+}
+
+
+[container mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.bottom.equalTo(lastView.mas_bottom);
+}];
+</code></pre>
+
+<p>头部效果
+<img src="http://i12.tietuku.com/0ead55378b7a7111.png" alt="头部效果" /></p>
+
+<p>尾部效果
+<img src="http://i12.tietuku.com/a27aa334358fddef.png" alt="尾部效果" /></p>
+
+<p>从scrollView的scrollIndicator可以看出 scrollView的内部已如我们所想排列好了</p>
+
+<p>这里的关键就在于container这个view起到了一个中间层的作用 能够自动的计算uiscrollView的contentSize</p>
+
+<h3>[高级] 横向或者纵向等间隙的排列一组view</h3>
+
+<p>很遗憾 autoLayout并没有直接提供等间隙排列的方法(Masonry的官方demo中也没有对应的案例) 但是参考案例3 我们可以通过一个小技巧来实现这个目的 为此我写了一个Category</p>
+
+<pre><code>@implementation UIView(Masonry_LJC)
+
+- (void) distributeSpacingHorizontallyWith:(NSArray*)views
+{
+    NSMutableArray *spaces = [NSMutableArray arrayWithCapacity:views.count+1];
+
+    for ( int i = 0 ; i &lt; views.count+1 ; ++i )
+    {
+        UIView *v = [UIView new];
+        [spaces addObject:v];
+        [self addSubview:v];
+
+        [v mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(v.mas_height);
+        }];
+    }    
+
+    UIView *v0 = spaces[0];
+
+    [v0 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.mas_left);
+        make.centerY.equalTo(((UIView*)views[0]).mas_centerY);
+    }];
+
+    UIView *lastSpace = v0;
+    for ( int i = 0 ; i &lt; views.count; ++i )
+    {
+        UIView *obj = views[i];
+        UIView *space = spaces[i+1];
+
+        [obj mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(lastSpace.mas_right);
+        }];
+
+        [space mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(obj.mas_right);
+            make.centerY.equalTo(obj.mas_centerY);
+            make.width.equalTo(v0);
+        }];
+
+        lastSpace = space;
+    }
+
+    [lastSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.equalTo(self.mas_right);
+    }];
+
+}
+
+- (void) distributeSpacingVerticallyWith:(NSArray*)views
+{
+    NSMutableArray *spaces = [NSMutableArray arrayWithCapacity:views.count+1];
+
+    for ( int i = 0 ; i &lt; views.count+1 ; ++i )
+    {
+        UIView *v = [UIView new];
+        [spaces addObject:v];
+        [self addSubview:v];
+
+        [v mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(v.mas_height);
+        }];
+    }
+
+
+    UIView *v0 = spaces[0];
+
+    [v0 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.mas_top);
+        make.centerX.equalTo(((UIView*)views[0]).mas_centerX);
+    }];
+
+    UIView *lastSpace = v0;
+    for ( int i = 0 ; i &lt; views.count; ++i )
+    {
+        UIView *obj = views[i];
+        UIView *space = spaces[i+1];
+
+        [obj mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(lastSpace.mas_bottom);
+        }];
+
+        [space mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(obj.mas_bottom);
+            make.centerX.equalTo(obj.mas_centerX);
+            make.height.equalTo(v0);
+        }];
+
+        lastSpace = space;
+    }
+
+    [lastSpace mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.mas_bottom);
+    }];
+
+}
+
+@end
+</code></pre>
+
+<p>简单的来测试一下</p>
+
+<pre><code>UIView *sv11 = [UIView new];
+UIView *sv12 = [UIView new];
+UIView *sv13 = [UIView new];
+UIView *sv21 = [UIView new];
+UIView *sv31 = [UIView new];
+
+sv11.backgroundColor = [UIColor redColor];
+sv12.backgroundColor = [UIColor redColor];
+sv13.backgroundColor = [UIColor redColor];
+sv21.backgroundColor = [UIColor redColor];
+sv31.backgroundColor = [UIColor redColor];
+
+[sv addSubview:sv11];
+[sv addSubview:sv12];
+[sv addSubview:sv13];
+[sv addSubview:sv21];
+[sv addSubview:sv31];
+
+//给予不同的大小 测试效果
+
+[sv11 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.centerY.equalTo(@[sv12,sv13]);
+    make.centerX.equalTo(@[sv21,sv31]);
+    make.size.mas_equalTo(CGSizeMake(40, 40));
+}];
+
+[sv12 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(70, 20));
+}];
+
+[sv13 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(50, 50));
+}];
+
+[sv21 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(50, 20));
+}];
+
+[sv31 mas_makeConstraints:^(MASConstraintMaker *make) {
+    make.size.mas_equalTo(CGSizeMake(40, 60));
+}];
+
+[sv distributeSpacingHorizontallyWith:@[sv11,sv12,sv13]];
+[sv distributeSpacingVerticallyWith:@[sv11,sv21,sv31]];
+
+[sv showPlaceHolderWithAllSubviews];
+[sv hidePlaceHolder];
+</code></pre>
+
+<p>代码效果
+<img src="http://i12.tietuku.com/5ef072f7c4e6f689.png" alt="代码效果" /></p>
+
+<p>perfect! 简洁明了的达到了我们所要的效果</p>
+
+<p>这里所用的技巧就是 使用空白的占位view来填充我们目标view的旁边 这点通过图上的空白标注可以看出来</p>
+
+<h2>小结</h2>
+
+<p>通过以上5个案例 我觉得已经把Masonry的常用功能介绍得差不多了 如果你觉得意犹未尽呢 请下载官方的demo来学习</p>
+
+<p>总而言之 Masonry是一个非常优秀的autolayout库 能够节省大量的开发和学习时间 尤其适合我这种纯代码的iOSer 在iPhone6发布后引发的适配潮中 Masonry一定可以助你一臂之力 :)</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-11T15:58:23+08:00'><span class='date'>2015 年5 月11 日</span> <span class='time'>3:58 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2015/05/11/Masonry-%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8BautoLayout/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2015/05/11/Masonry-%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8BautoLayout/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/04/11/%E5%A6%82%E4%BD%95%E4%B8%8A%E4%BC%A0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%88%B0github/" title="Previous Post: 如何上传本地文件到github">&laquo; 如何上传本地文件到github</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/05/14/%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/" title="Next Post: 数据持久化的几种方式">数据持久化的几种方式 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS Git 使用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

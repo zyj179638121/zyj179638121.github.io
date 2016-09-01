@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>3DTouch、ShortcutItem、Peek and Pop - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="3DTouch UITouch类里API的变化 iOS9中添加的属性 altitudeAngle 当笔平行于平面时,该值为0
+当笔垂直于平面时,该值为Pi / 2 estimatedProperties 当前触摸对象估计的触摸特性
+返回值是UITouchPropertyies &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2015/11/10/3DTouch%E3%80%81ShortcutItem%E3%80%81Peek-And-Pop/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">3DTouch、ShortcutItem、Peek and Pop</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-11-10T11:01:28+08:00'><span class='date'>2015 年11 月10 日</span> <span class='time'>11:01 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>3DTouch</h3>
+
+<!--more-->
+
+
+<p><img src="http://i12.tietuku.com/14bc7ec46d5364ab.jpg" alt="" /></p>
+
+<h4>UITouch类里API的变化</h4>
+
+<h5>iOS9中添加的属性</h5>
+
+<p><code>altitudeAngle</code></p>
+
+<ul>
+<li><p>当笔平行于平面时,该值为0</p></li>
+<li><p>当笔垂直于平面时,该值为Pi / 2</p></li>
+</ul>
+
+
+<p><code>estimatedProperties</code></p>
+
+<ul>
+<li><p>当前触摸对象估计的触摸特性</p></li>
+<li><p>返回值是UITouchPropertyies</p></li>
+</ul>
+
+
+<p><code>updatedProperties</code></p>
+
+<ul>
+<li><p>当前触摸对象已经更新的触摸特性</p></li>
+<li><p>返回值是UITouchPropertyies</p></li>
+</ul>
+
+
+<p><code>estimationUpdateIndex</code></p>
+
+<ul>
+<li><p>当每个触摸对象的触摸特性发生变化时，该值将会单独增加</p></li>
+<li><p>返回值是NSNumber</p></li>
+</ul>
+
+
+<h5>iOS9中添加的方法</h5>
+
+<p><code>- PreciseLocationInView:</code></p>
+
+<ul>
+<li><p>当前触摸对象的坐标
+<code>- PrecisePreviousLocationInView:</code></p></li>
+<li><p>当前触摸对象的前置坐标
+<code>- azimuthAngleInview:</code></p></li>
+<li><p>沿着x轴正向的方位角</p></li>
+<li><p>当与x轴正向方向相同时,该值为0</p></li>
+<li><p>当view参数为nil时，默认为keyWindow</p></li>
+</ul>
+
+
+<p><code>- azimuthUnitVectorInView:</code></p>
+
+<ul>
+<li><p>当前触摸对象的方向上的单位向量</p></li>
+<li><p>当view参数为nil时，默认为keyWindow</p></li>
+</ul>
+
+
+<h4>UIForceTouchCapability</h4>
+
+<p><code>UIForceTouchCapabilityUnknown</code></p>
+
+<ul>
+<li>不能确定是否支持压力感应
+<code>UIForceTouchCapabilityUnavailable</code></li>
+<li>不能支持压力感应
+<code>UIForceTouchCapabilityAvailable</code></li>
+<li><p>可以支持压力感应</p>
+
+<h4>UITouchType</h4>
+
+<p><code>UITouchTypeDirect</code></p></li>
+<li><p>垂直的触摸类型
+<code>UITouchTypeIndirect</code></p></li>
+<li>非初值的触摸类型
+<code>UITouchTypeStylus</code></li>
+<li>水平的触摸类型
+<code>UITouchProperties</code>
+<code>UITouchPropertyForce</code></li>
+</ul>
+
+
+<hr />
+
+<h3>ShortcutItem</h3>
+
+<hr />
+
+<p><img src="http://i12.tietuku.com/3aa54dab286d6e1c.jpg" alt="" /></p>
+
+<h4>静态方式</h4>
+
+<ul>
+<li>打开Info.plist文件</li>
+<li>在对应UIApplicationShortcutItems关键字下添加item
+
+<h4>动态方式</h4>
+
+<h5>修改当前应用程序的某个shortcutItem</h5>
+
+<pre><code>    //获取第0个shortcutItem  
+    id oldItem = [existingShortcutItems objectAtIndex: 0];  
+    //将旧的shortcutItem改变为可修改类型shortcutItem  
+    id mutableItem = [oldItem mutableCopy];  
+    //修改shortcutItem的显示标题  
+    [mutableItem setLocalizedTitle: @“Click Lewis”];
+</code></pre>
+
+<h5>获取当前应用程序的shortcutItems</h5>
+
+<pre><code>    //获取当前应用程序对象  
+    UIApplication *app = [UIApplication sharedApplication];  
+    //获取一个应用程序对象的shortcutItem列表  
+    id existingShortcutItems = [app shortcutItems];
+</code></pre>
+
+<h5>重置当前应用程序的shortcutItems</h5>
+
+<pre><code>    //根据旧的shortcutItems生成可变shortcutItems数组  
+    id updatedShortcutItems = [existingShortcutItems mutableCopy];  
+    //修改可变shortcutItems数组中对应index下的元素为新的shortcutItem  
+    [updatedShortcutItems replaceObjectAtIndex: 0 withObject: mutableItem];  
+    //修改应用程序对象的shortcutItems为新的数组  
+    [app setShortcutItems: updatedShortcutItems];
+</code></pre>
+
+<h5>创建一个新的UIApplicationShortcutItem</h5></li>
+<li><p>初始化函数</p>
+
+<ul>
+<li>initWithType:localizedTitle:localizedSubtitle:icon:userInfo:</li>
+</ul>
+</li>
+<li>initWithType:localizedTitle:</li>
+<li><p>属性</p>
+
+<ul>
+<li><p>localizedTitle:NSString</p></li>
+<li><p>localizedSubtitle:NSString</p></li>
+<li><p>type:NSString</p></li>
+<li><p>icon:UIApplicationShortcutIcon</p></li>
+<li><p>userInfo:NSDictionary</p></li>
+<li><p>只有只读特性，想要进行修改时，需要通过mutableCopy方法转变为
+NSMutableApplicationShortcutItem</p>
+
+<h4>创建一个新的Item图标</h4></li>
+</ul>
+</li>
+<li><p>初始化函数</p>
+
+<ul>
+<li><p>iconWithType:</p></li>
+<li><p>iconWithTemplateImageName:</p></li>
+<li><p>iconWithContact:</p></li>
+</ul>
+</li>
+</ul>
+
+
+<h4>当程序启动时</h4>
+
+<ul>
+<li>判断launchOptions字典内的UIApplicationLaunchOptionsShortcutItemKey是否为空</li>
+<li>当不为空时,application:didFinishLaunchWithOptions方法返回false，否则返回true</li>
+<li>在application:performActionForShortcutItem:completionHandler方法内处理点击事件</li>
+</ul>
+
+
+<hr />
+
+<h3>Peek and Pop</h3>
+
+<hr />
+
+<p><img src="http://i12.tietuku.com/544e882ddf85ae59.jpg" alt="" />
+注册预览功能的代理对象和源视图
+代理对象需要接受UIViewControllerPreviewingDelegate协议
+  @interface RootVC<UIViewControllerPreviewingDelegate><br/>
+  {}<br/>
+  @end
+代理对象实现协议内的Peek和Pop方法</p>
+
+<pre><code>  @implementation RootVC  
+  - (UIViewController *)previewingContext:(id&lt;UIViewControllerPreviewing&gt;)context viewControllerForLocation:(CGPoint) point  
+  {  
+  UIViewController *childVC = [[UIViewController alloc] init];  
+  childVC.preferredContentSize = CGSizeMake(0.0f,300f);  
+
+  CGRect rect = CGRectMake(10, point.y - 10, self.view.frame.size.width - 20,20);  
+  context.sourceRect = rect;  
+  return childVC;  
+  }  
+  - (void)previewContext:(id&lt;UIViewControllerPreviewing&gt;)context commitViewController:(UIViewController*)vc  
+  {  
+  [self showViewController:vc sender:self];  
+  }  
+  @end
+</code></pre>
+
+<h4>注册方法声明在UIViewController类内</h4>
+
+<pre><code>[self registerForPreviewingWithDelegate:self sourceView:self.view];      
+</code></pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-11-10T11:01:28+08:00'><span class='date'>2015 年11 月10 日</span> <span class='time'>11:01 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2015/11/10/3DTouch%E3%80%81ShortcutItem%E3%80%81Peek-And-Pop/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2015/11/10/3DTouch%E3%80%81ShortcutItem%E3%80%81Peek-And-Pop/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/10/01/Swiftype%E6%B7%BB%E5%8A%A0%E7%AB%99%E5%86%85%E6%90%9C%E7%B4%A2/" title="Previous Post: Swiftype添加站内搜索">&laquo; Swiftype添加站内搜索</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/11/20/%E4%BD%BF%E7%94%A8WKWebView%E6%9B%BF%E6%8D%A2UIWebView/" title="Next Post: 使用WKWebView替换UIWebView">使用WKWebView替换UIWebView &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS Git 使用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

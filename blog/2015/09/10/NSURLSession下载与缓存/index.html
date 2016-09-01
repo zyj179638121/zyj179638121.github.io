@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>NSURLSession下载与缓存 - 小赵的blog</title>
+  <meta name="author" content="小赵">
+
+  
+  <meta name="description" content="NSURLSession下载与缓存
+iOS9要求网络请求需要使用NSURLSession,那么本篇文章
+就使用NSURLsession来实现视频的下载,图片的下载、取消下载、恢复下
+载和缓存功能，期望与大家一起学习。 NSURLSessionConfiguration(参数配置类) &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://zyj179638121.github.io/blog/2015/09/10/NSURLSession%E4%B8%8B%E8%BD%BD%E4%B8%8E%E7%BC%93%E5%AD%98/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="小赵的blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">小赵的blog</a></h1>
+  
+    <h2>A blogging framework for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="zyj179638121.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">NSURLSession下载与缓存</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-09-10T10:00:25+08:00'><span class='date'>2015 年9 月10 日</span> <span class='time'>10:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>NSURLSession下载与缓存
+iOS9要求网络请求需要使用NSURLSession,那么本篇文章
+就使用NSURLsession来实现视频的下载,图片的下载、取消下载、恢复下
+载和缓存功能，期望与大家一起学习。</p>
+
+<!--more-->
+
+
+<p>NSURLSessionConfiguration(参数配置类)</p>
+
+<p>NSURLSession状态同时对应着多个连接,不像之前使用共享的一个全局状态。会话是通过工厂方法（类方法)来创建对象
+NSURLSessionConfiguration。</p>
+
+<p>总共有三种会话：</p>
+
+<ul>
+<li><p>1.defaultSessionConfiguration 默认的，进程内会话</p></li>
+<li><p>2.ephemeralSessionConfiguration短暂的（内
+存），进程内会话</p></li>
+<li><p>3.backgroundSessionConfigurationWithIdentifier后台会话</p></li>
+</ul>
+
+
+<p>相关属性</p>
+
+<pre><code>//后台任务的标识符
+
+@property (nullable, readonly, copy) NSString *id entifier;
+
+//缓存的策略
+
+@property NSURLRequestCachePolicy requestCachePolicy;
+
+//请求超时时长
+
+@property NSTimeInterval timeoutIntervalForRequest;
+
+//网络服务类型
+
+@property NSURLRequestNetworkServiceType networkServiceType;
+
+//是否在非无线的情况下请求网络
+
+@property BOOL allowsCellularAccess;
+</code></pre>
+
+<h4>手动下载视频</h4>
+
+<h4>步骤：</h4>
+
+<p>在Info.plist中添加<code>NSAppTransportSecurity</code>类型Dictionary。
+在<code>NSAppTransportSecurity</code>下添加<code>NSAllowsArbitraryLoads</code>类型Boolean,值设为YES;
+Xcode7需要添加此条支持http</p>
+
+<p>在工程内引入<code>AVFoundation</code>框架，并在相关类引入AVKit、AVFoundation头文件;</p>
+
+<p>遵守<code>NSURLSessionDelegate</code>，<code>NSURLSessionDownloadDelegate</code>协议；
+准备一个MP4格式的url，进行下载；
+将下载完成的视频资源存入本地，并进行播放。</p>
+
+<h4>声明相关属性</h4>
+
+<pre><code> //下载任务  
+ @property (nonatomic, strong)NSURLSessionDownloadTask *downTask;  
+
+ //网络会话  
+ @property (nonatomic, strong)NSURLSession * downLoadSession;
+</code></pre>
+
+<h4>配置相关参数并下载</h4>
+
+<pre><code>    //参数设置类  简单的网络下载使用             
+defaultSessionConfiguration即可
+NSURLSessionConfiguration          *sessionConfig =        
+[NSURLSessionConfiguration
+defaultSessionConfiguration];
+
+ //创建网络会话  
+ self.downLoadSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:[NSOperationQueue new]];
+
+
+ //数据请求  
+ /*
+  *@param URL 资源url  
+  *@param timeoutInterval 超时时长
+  */
+ NSURLRequest *imgRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:MP3URL] cachePolicy:5 timeoutInterval:60.f];
+
+ //创建下载任务  
+ self.downTask = [self.downLoadSession downloadTaskWithRequest:imgRequest];
+
+ //启动下载任务  
+ [self.downTask resume];
+</code></pre>
+
+<h4>实现代理方法</h4>
+
+<pre><code>  #pragma mark 下载过程
+
+  -(void)URLSession:(NSURLSession *)sessiondownloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
+{
+   //获取下载进度
+  double currentProgress = totalBytesWritten / (double)totalBytesExpectedToWrite;
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+
+   //进行UI操作  设置进度条
+
+    self.downLoadProgress.progress = currentProgress;
+
+});
+
+  #pragma mark 下载完成 无论成功失败
+
+ -(void)URLSession:(NSURLSession *)session task: (NSURLSessionTask *)task didCompleteWithError:(NSError *)error
+ {
+
+    NSLog(@" function == %s, line == %d, error ==  %@",__FUNCTION__,__LINE__,error);
+
+ }
+   #pragma mark - 下载成功 获取下载内容
+ -(void)URLSession:(NSURLSession *)session   downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location
+ {
+//存储本地
+
+//1.获取Documents文件夹路径 （不要将视频、音频等较大资源存储在Caches路径下）
+    *方法一
+    NSString *documentsPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) lastObject];
+
+    *方法二
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSURL * documentsDirectory = [fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0];
+
+   //2.创建资源存储路径
+   NSString *appendPath = [NSString stringWithFormat:@"/new.mp4"];
+   NSString *file = [documentsPath stringByAppendingString:appendPath];
+
+   //3.将下载好的视频资源存储在路径下
+
+  //删除之前相同路径的文件
+    BOOL remove  = [manager removeItemAtPath:file error:nil];
+
+  //将视频资源从原有路径移动到自己指定的路径
+    BOOL success = [manager copyItemAtPath:location.path toPath:file error:nil];
+
+    if (success) {
+
+  //回到主线程进行本地视频播放
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+    //创建视频播放的本地路径
+
+    *** 请使用此方法创建本地路径
+    NSURL *url = [[NSURL alloc]initFileURLWithPath:file];
+
+    *** 此方法创建的路径无法播放 不是一个完整的路径
+   //NSURL *url2 = [[NSURL alloc]initWithString:file];
+
+    //系统的视频播放器
+    AVPlayerViewController *controller = [[AVPlayerViewController alloc]init];
+    //播放器的播放类
+    AVPlayer * player = [[AVPlayer alloc]initWithURL:url];
+
+    controller.player = player;
+    //自动开始播放
+    [controller.player play];
+    //推出视屏播放器
+    [self presentViewController:controller animated:YES completion:nil];
+
+
+    });
+}
+
+ }
+NSURLSessionDownloadTask支持取消下载，可以在下载过程中随时取消继续下载，同时也可以实现恢复下载。
+</code></pre>
+
+<h4>取消下载 cancelByProducingResumeData</h4>
+
+<pre><code>//用当前NSURLSessionDownloadTask对象去调用取消下载
+
+ [self.downTask cancelByProducingResumeData:
+^(NSData * _Nullable resumeData) {
+
+ //全局变量 接收当前下载的资源
+  self.data = resumeData;
+}
+ //将当前下载任务置为空
+  self.downTask = nil;
+</code></pre>
+
+<h4>恢复下载 downloadTaskWithResumeData</h4>
+
+<pre><code>//恢复下载 实际上是建立了一个新的下载任务 去继续之前的下载
+
+self.downTask = [self.downLoadSession downloadTaskWithResumeData:self.data];
+
+   //开启任务     
+  [self.downTask resume];
+
+}
+</code></pre>
+
+<h4>自动缓存</h4>
+
+<p>上面讲到的是自己去手动操控整个下载过程，那么，很多伙伴就会讲这样是不是太麻烦了。如果你了解了NSURLSession的缓存策略，那么，你就会发现，我们这么写确实是太麻烦了，那么下面我们就来学习一下NSURsession的自动缓存。</p>
+
+<p>在开始之前，先介绍一下<code>NSURLRequestUseProtocolCachePolicy</code>的几种缓存策略：</p>
+
+<ul>
+<li><p>1>NSURLRequestUseProtocolCachePolicy = 0, 默认的缓存策略， 如果缓存不存在，直接从服务端获取。如果缓存存在，
+会根据response中的Cache-Control字段判断下一步操作，如: Cache-Control字段为must-revalidata, 则询问服务端该数据是否有更新，无更新的话直接返回给用户缓存数据，若已更新，则请求服务端.</p></li>
+<li><p>2>NSURLRequestReloadIgnoringLocalCacheData = 1, 忽略本地缓存数据，直接请求服务端.</p></li>
+<li><p>3>NSURLRequestIgnoringLocalAndRemoteCacheData = 4, 忽略本地缓存，代理服务器以及其他中介，直接请求源服务端.</p></li>
+<li><p>4>NSURLRequestReloadIgnoringCacheData = NSURLRequestReloadIgnoringLocalCacheData</p></li>
+<li><p>5>NSURLRequestReturnCacheDataElseLoad = 2, 有缓存就使用，不管其有效性(即忽略Cache-Control字段), 无则请求服务端.</p></li>
+<li><p>6>NSURLRequestReturnCacheDataDontLoad = 3, 死活加载本地缓存. 没有就失败. (确定当前无网络时使用).</p></li>
+<li><p>7>NSURLRequestReloadRevalidatingCacheData = 5, 缓存数据必须得得到服务端确认有效才使用(貌似是NSURLRequestUseProtocolCachePolicy中的一种情况)
+因此，我们可以根据自己的需求去设置不同的缓存策略，而默认的就是如果有缓存就通过缓存获取数据，没有缓存就去请求网络数据。
+这里，我们通过一个请求图片的例子，来窥探一下神奇的自动缓存。</p></li>
+</ul>
+
+
+<p>代码：</p>
+
+<pre><code>    //创建一个UIImageView+MyImageView.h的类目，
+  在.h添加一个方法
+ - (void)loadIamgeWithURL:(NSString *)urlString
+  //在.m去实现此方法  
+ - (void)loadIamgeWithURL:(NSString *)urlString
+{
+
+//创建下载图片的url
+  NSURL *url = [NSURL URLWithString:urlString];
+
+//创建网络请求配置类
+  NSURLSessionConfiguration * configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+
+//创建网络会话
+  NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:[NSOperationQueue new]];
+
+//创建请求并设置缓存策略以及超时时长
+  NSURLRequest *imgRequest = [NSURLRequest requestWithURL:url cachePolicy:0 timeoutInterval:30.f];
+   //*也可通过configuration.requestCachePolicy 设置缓存策略
+
+//创建一个下载任务
+  NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:imgRequest completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+
+  //下载完成后获取数据 此时已经自动缓存到本地，下次会直接从本地缓存获取，不再进行网络请求
+  NSData * data = [NSData dataWithContentsOfURL:location];
+
+  //回到主线程  
+   dispatch_async(dispatch_get_main_queue(), ^{
+
+  //设置图片      
+   self.image = [UIImage imageWithData:data];
+ });
+
+
+}];
+
+
+//启动下载任务
+ [task resume];
+
+ }
+</code></pre>
+
+<h3>swift下载任务</h3>
+
+<p>import UIKit</p>
+
+<p>class ViewController: UIViewController,NSURLSessionDelegate,NSURLSessionDataDelegate {</p>
+
+<pre><code>var session:NSURLSession!
+
+override func viewDidLoad() {
+    super.viewDidLoad()
+
+
+    //let config = NSURLSessionConfiguration.backgroundSessionConfiguration("back")//不赞成使用
+    //let config = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("back")//委托中不能使用,使用系统处理下载,就算APP没有运行了,也可以实现
+    //let config = NSURLSessionConfiguration.ephemeralSessionConfiguration();//这个是临时数据下载,适用于小数据下载
+    let config = NSURLSessionConfiguration.defaultSessionConfiguration()//默认配置
+    config.timeoutIntervalForRequest = 15 //连接超时时间
+
+    session = NSURLSession(configuration: config, delegate: self, delegateQueue:nil)//队列中,如果想要程序在主线程中执行,可以使用NSOperationQueue.mainQueue()
+
+    let url = NSURL(string: "http://www.wutongwei.com")
+
+
+    let task = session.dataTaskWithURL(url!, completionHandler: { (
+        data, response, error) -&gt; Void in
+
+
+        let str = NSString(data: data, encoding: NSUTF8StringEncoding)
+        println("Done!")
+
+        self.session.finishTasksAndInvalidate() //确保执行完成后,释放session
+
+
+        if error == nil {
+
+            let manager = NSFileManager()
+
+            //
+            var error:NSError?
+            var destinationPath = manager.URLForDirectory(NSSearchPathDirectory.CachesDirectory, inDomain: NSSearchPathDomainMask.UserDomainMask, appropriateForURL: url, create: true, error: &amp;error)!
+            //
+            let componenetsOfUrl = url?.absoluteString!.componentsSeparatedByString("/")
+            let index = componenetsOfUrl!.count - 1
+            let fileNameFromUrl = componenetsOfUrl![index]
+
+            destinationPath = destinationPath.URLByAppendingPathComponent(fileNameFromUrl)
+
+
+            //
+            manager.moveItemAtURL(url!, toURL: destinationPath, error: nil)
+
+            let message = "保存下载数据到 = \(destinationPath)"
+
+            self.displayAlertWithTitle("Success", message: message)
+
+
+        }else{
+            self.displayAlertWithTitle("Error", message: "不能下载这数据,一个错误抛出")
+        }
+
+
+
+    })
+
+    task.resume() //这个是启动任务的,不调用,则不会执行请求
+
+}
+
+
+func displayAlertWithTitle(title:String,message:String){
+
+    let controller = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+    controller.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+    presentViewController(controller, animated: true, completion: nil)
+}
+
+
+///
+
+override func didReceiveMemoryWarning() {
+    super.didReceiveMemoryWarning()
+    // Dispose of any resources that can be recreated.
+}
+</code></pre>
+
+<p>}</p>
+
+<p>通过这种缓存策略，我们就可以实现图片下载并自动缓存，当我们需要再次使用此资源的时候，它就会自动去本地缓存查找是否有已经下载好的图片资源，如果有就会直接去本地的，从而不需要再去进行网络请求。可以在下载完成后，将网络断开进行测试。
+总结
+本次主要是讲解了NSURLSession的下载，以及自动缓存策略。它的功能非常强大，还有很多没来得及细细研究，如果你也喜欢它😍，那就抓紧时间去研究吧~</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">小赵</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-09-10T10:00:25+08:00'><span class='date'>2015 年9 月10 日</span> <span class='time'>10:00 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://zyj179638121.github.io/blog/2015/09/10/NSURLSession%E4%B8%8B%E8%BD%BD%E4%B8%8E%E7%BC%93%E5%AD%98/" data-via="" data-counturl="http://zyj179638121.github.io/blog/2015/09/10/NSURLSession%E4%B8%8B%E8%BD%BD%E4%B8%8E%E7%BC%93%E5%AD%98/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/10/%E4%BD%BF%E7%94%A8WebViewJavascriptBridge%E5%AE%9E%E7%8E%B0OC%E4%B8%8EJS%E4%BA%A4%E4%BA%92/" title="Previous Post: 使用WebViewJavascriptBridge实现OC与JS交互">&laquo; 使用WebViewJavascriptBridge实现OC与JS交互</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/10/01/Swiftype%E6%B7%BB%E5%8A%A0%E7%AB%99%E5%86%85%E6%90%9C%E7%B4%A2/" title="Next Post: Swiftype添加站内搜索">Swiftype添加站内搜索 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/08/11/iOS%20%E5%B1%8F%E8%94%BDemoji%E8%A1%A8%E6%83%85%20%E4%B8%8B%E5%8D%885.21.42/">iOS屏蔽emoji表情</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/03/iOS%20UITabbar%E6%B6%88%E5%A4%B1%E7%9A%84%E9%97%AE%E9%A2%98%20%E4%B8%8B%E5%8D%885.21.42/">iOS UITabbar消失的问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/">iOS Git 使用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/28/UIView%E7%9A%84layoutSubviews%E5%92%8CdrawRect%E6%96%B9%E6%B3%95%E4%BD%95%E6%97%B6%E8%B0%83%E7%94%A8/">UIView的layoutSubviews和drawRect方法何时调用</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/01/22/swift%E5%8D%95%E4%BE%8B/">Swift单例</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - 小赵 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

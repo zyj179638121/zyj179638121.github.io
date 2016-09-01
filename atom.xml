@@ -4,7 +4,7 @@
   <title><![CDATA[小赵的blog]]></title>
   <link href="http://zyj179638121.github.io/atom.xml" rel="self"/>
   <link href="http://zyj179638121.github.io/"/>
-  <updated>2016-09-01T10:05:47+08:00</updated>
+  <updated>2016-09-01T10:07:35+08:00</updated>
   <id>http://zyj179638121.github.io/</id>
   <author>
     <name><![CDATA[小赵]]></name>
@@ -210,11 +210,11 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[iOS 第一章]]></title>
+    <title type="html"><![CDATA[iOS Git 使用]]></title>
     <link href="http://zyj179638121.github.io/blog/2016/08/01/git%20add%20remote%20%E4%B8%8B%E5%8D%885.21.42/"/>
     <updated>2016-08-01T15:34:27+08:00</updated>
     <id>http://zyj179638121.github.io/blog/2016/08/01/git add remote 下午5.21.42</id>
-    <content type="html"><![CDATA[<h1>第一次写东西,git关联远程仓库</h1>
+    <content type="html"><![CDATA[<h1>Git关联远程仓库</h1>
 
 <h2>gogs</h2>
 
@@ -225,7 +225,7 @@
 5.git remote add origin xxxxxxx //添加远程仓库,xxx为仓库地址<br/>
 6.git push -u origin master  // push到远程仓库</p>
 
-<h2>gitoschina</h2>
+<h2>gitOschina</h2>
 
 <p>1.oschina上面新建一个仓库<br/>
 2.xcode新建工程<br/>

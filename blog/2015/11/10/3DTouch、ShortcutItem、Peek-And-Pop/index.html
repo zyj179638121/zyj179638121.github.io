@@ -1,0 +1,218 @@
+<p>layout: ios9
+title: 3DTouch、ShortcutItem、Peek And Pop
+date: 2015-11-10 11:01:28
+tags:</p>
+
+<hr />
+
+<h3>3DTouch</h3>
+
+<!--more-->
+
+
+<p><img src="http://i12.tietuku.com/14bc7ec46d5364ab.jpg" alt="" /></p>
+
+<h4>UITouch类里API的变化</h4>
+
+<h5>iOS9中添加的属性</h5>
+
+<p><code>altitudeAngle</code></p>
+
+<ul>
+<li><p>当笔平行于平面时,该值为0</p></li>
+<li><p>当笔垂直于平面时,该值为Pi / 2</p></li>
+</ul>
+
+
+<p><code>estimatedProperties</code></p>
+
+<ul>
+<li><p>当前触摸对象估计的触摸特性</p></li>
+<li><p>返回值是UITouchPropertyies</p></li>
+</ul>
+
+
+<p><code>updatedProperties</code></p>
+
+<ul>
+<li><p>当前触摸对象已经更新的触摸特性</p></li>
+<li><p>返回值是UITouchPropertyies</p></li>
+</ul>
+
+
+<p><code>estimationUpdateIndex</code></p>
+
+<ul>
+<li><p>当每个触摸对象的触摸特性发生变化时，该值将会单独增加</p></li>
+<li><p>返回值是NSNumber</p></li>
+</ul>
+
+
+<h5>iOS9中添加的方法</h5>
+
+<p><code>- PreciseLocationInView:</code></p>
+
+<ul>
+<li><p>当前触摸对象的坐标
+<code>- PrecisePreviousLocationInView:</code></p></li>
+<li><p>当前触摸对象的前置坐标
+<code>- azimuthAngleInview:</code></p></li>
+<li><p>沿着x轴正向的方位角</p></li>
+<li><p>当与x轴正向方向相同时,该值为0</p></li>
+<li><p>当view参数为nil时，默认为keyWindow</p></li>
+</ul>
+
+
+<p><code>- azimuthUnitVectorInView:</code></p>
+
+<ul>
+<li><p>当前触摸对象的方向上的单位向量</p></li>
+<li><p>当view参数为nil时，默认为keyWindow</p></li>
+</ul>
+
+
+<h4>UIForceTouchCapability</h4>
+
+<p><code>UIForceTouchCapabilityUnknown</code></p>
+
+<ul>
+<li>不能确定是否支持压力感应
+<code>UIForceTouchCapabilityUnavailable</code></li>
+<li>不能支持压力感应
+<code>UIForceTouchCapabilityAvailable</code></li>
+<li><p>可以支持压力感应</p>
+
+<h4>UITouchType</h4>
+
+<p><code>UITouchTypeDirect</code></p></li>
+<li><p>垂直的触摸类型
+<code>UITouchTypeIndirect</code></p></li>
+<li>非初值的触摸类型
+<code>UITouchTypeStylus</code></li>
+<li>水平的触摸类型
+<code>UITouchProperties</code>
+<code>UITouchPropertyForce</code></li>
+</ul>
+
+
+<hr />
+
+<h3>ShortcutItem</h3>
+
+<hr />
+
+<p><img src="http://i12.tietuku.com/3aa54dab286d6e1c.jpg" alt="" /></p>
+
+<h4>静态方式</h4>
+
+<ul>
+<li>打开Info.plist文件</li>
+<li>在对应UIApplicationShortcutItems关键字下添加item
+
+<h4>动态方式</h4>
+
+<h5>修改当前应用程序的某个shortcutItem</h5>
+
+<pre><code>    //获取第0个shortcutItem  
+    id oldItem = [existingShortcutItems objectAtIndex: 0];  
+    //将旧的shortcutItem改变为可修改类型shortcutItem  
+    id mutableItem = [oldItem mutableCopy];  
+    //修改shortcutItem的显示标题  
+    [mutableItem setLocalizedTitle: @“Click Lewis”];
+</code></pre>
+
+<h5>获取当前应用程序的shortcutItems</h5>
+
+<pre><code>    //获取当前应用程序对象  
+    UIApplication *app = [UIApplication sharedApplication];  
+    //获取一个应用程序对象的shortcutItem列表  
+    id existingShortcutItems = [app shortcutItems];
+</code></pre>
+
+<h5>重置当前应用程序的shortcutItems</h5>
+
+<pre><code>    //根据旧的shortcutItems生成可变shortcutItems数组  
+    id updatedShortcutItems = [existingShortcutItems mutableCopy];  
+    //修改可变shortcutItems数组中对应index下的元素为新的shortcutItem  
+    [updatedShortcutItems replaceObjectAtIndex: 0 withObject: mutableItem];  
+    //修改应用程序对象的shortcutItems为新的数组  
+    [app setShortcutItems: updatedShortcutItems];
+</code></pre>
+
+<h5>创建一个新的UIApplicationShortcutItem</h5></li>
+<li><p>初始化函数</p>
+
+<ul>
+<li>initWithType:localizedTitle:localizedSubtitle:icon:userInfo:</li>
+</ul>
+</li>
+<li>initWithType:localizedTitle:</li>
+<li><p>属性</p>
+
+<ul>
+<li><p>localizedTitle:NSString</p></li>
+<li><p>localizedSubtitle:NSString</p></li>
+<li><p>type:NSString</p></li>
+<li><p>icon:UIApplicationShortcutIcon</p></li>
+<li><p>userInfo:NSDictionary</p></li>
+<li><p>只有只读特性，想要进行修改时，需要通过mutableCopy方法转变为
+NSMutableApplicationShortcutItem</p>
+
+<h4>创建一个新的Item图标</h4></li>
+</ul>
+</li>
+<li><p>初始化函数</p>
+
+<ul>
+<li><p>iconWithType:</p></li>
+<li><p>iconWithTemplateImageName:</p></li>
+<li><p>iconWithContact:</p></li>
+</ul>
+</li>
+</ul>
+
+
+<h4>当程序启动时</h4>
+
+<ul>
+<li>判断launchOptions字典内的UIApplicationLaunchOptionsShortcutItemKey是否为空</li>
+<li>当不为空时,application:didFinishLaunchWithOptions方法返回false，否则返回true</li>
+<li>在application:performActionForShortcutItem:completionHandler方法内处理点击事件</li>
+</ul>
+
+
+<hr />
+
+<h3>Peek and Pop</h3>
+
+<hr />
+
+<p><img src="http://i12.tietuku.com/544e882ddf85ae59.jpg" alt="" />
+注册预览功能的代理对象和源视图
+代理对象需要接受UIViewControllerPreviewingDelegate协议
+  @interface RootVC<UIViewControllerPreviewingDelegate><br/>
+  {}<br/>
+  @end
+代理对象实现协议内的Peek和Pop方法</p>
+
+<pre><code>  @implementation RootVC  
+  - (UIViewController *)previewingContext:(id&lt;UIViewControllerPreviewing&gt;)context viewControllerForLocation:(CGPoint) point  
+  {  
+  UIViewController *childVC = [[UIViewController alloc] init];  
+  childVC.preferredContentSize = CGSizeMake(0.0f,300f);  
+
+  CGRect rect = CGRectMake(10, point.y - 10, self.view.frame.size.width - 20,20);  
+  context.sourceRect = rect;  
+  return childVC;  
+  }  
+  - (void)previewContext:(id&lt;UIViewControllerPreviewing&gt;)context commitViewController:(UIViewController*)vc  
+  {  
+  [self showViewController:vc sender:self];  
+  }  
+  @end
+</code></pre>
+
+<h4>注册方法声明在UIViewController类内</h4>
+
+<pre><code>[self registerForPreviewingWithDelegate:self sourceView:self.view];      
+</code></pre>

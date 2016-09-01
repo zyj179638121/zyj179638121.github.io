@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "iOS 第一章"
+title: "iOS Git 使用"
 date: 2016-08-01 15:34:27 +0800
 comments: true
 categories: 
 ---
-#第一次写东西,git关联远程仓库  
+#Git关联远程仓库  
 ## gogs  
 1.gogs上面新建一个仓库  
 2.xcode新建工程  
@@ -14,7 +14,7 @@ categories:
 5.git remote add origin xxxxxxx //添加远程仓库,xxx为仓库地址  
 6.git push -u origin master  // push到远程仓库  
 
-##gitoschina  
+##gitOschina  
 1.oschina上面新建一个仓库  
 2.xcode新建工程  
 3.git add .  
